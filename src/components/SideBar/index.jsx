@@ -24,6 +24,7 @@ const SideBar = ({ sideBar }) => {
                 width: "100vw",
                 maxWidth: "300px",
                 minWidth: "300px",
+                position: "fixed",
             }}
         >
             <div className="w-full">

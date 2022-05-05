@@ -22,7 +22,7 @@ const Dashboard = () => {
         <>
             <div className="flex flex-nowrap w-full">
                 <SideBar sideBar={sideBar} />
-                <div className="w-full">
+                <div className="w-full md:ml-[300px] m-0">
                     <NavBar />
                     <div className="p-6">
                         <Routes>
