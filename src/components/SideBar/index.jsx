@@ -15,6 +15,7 @@ const SideBar = ({ sideBar }) => {
         }
         return pathname.split("/")[2] === path ? classes.activeLink : classes.link;
     }
+
     return (
         <div
             className={`${sideBar ? "" : "hidden"

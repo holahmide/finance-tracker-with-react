@@ -1,24 +1,56 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FaSearch, FaEdit } from "react-icons/fa";
 import Moment from "react-moment";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from 'recharts';
 import CreateSpending from "../../../components/UI/CreateSpending";
+import SpendingService from "../../../services/spending-service";
 
 const data = [{ name: 'Jan 2021', uv: 400, pv: 2400, amt: 2400 }, { name: 'Feb 2021', uv: 100, pv: 2100, amt: 200 }, { name: 'Mar 2021', uv: 300, pv: 100, amt: 2000 }];
 
 const Spendings = () => {
-    const [searchText, setSearchText] = useState(null);
+    const [searchText, setSearchText] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [spendings, setSpendings] = useState([]);
+
+    useEffect(() => {
+        const initialSetup = async () => {
+            const response = await SpendingService.fetchAll()
+            setSpendings(response.data.spendings.reverse().splice(0, 10))
+            setLoading(() => false)
+        }
+        initialSetup();
+    }, []);
 
     const searchHandler = (event) => {
         setSearchText(() => event.target.value);
     };
 
-    useEffect(() => {
-        // effect
-        return () => {
-            // cleanup
-        };
-    }, [searchText]);
+    const getDescriptionText = useCallback((breakdowns) => {
+        let items = ''
+        breakdowns.map((breakdown, index) => {
+            if (breakdown.item) {
+                if (index === breakdowns.length-1) {
+                    items += breakdown.item
+                }
+                else items += breakdown.item + ', '
+            }
+            return true
+        })
+        return items;
+    }, [])
+
+    const addSpending = useCallback((data) => {
+        let spendingRecord = data.spending
+        spendingRecord.Breakdowns = data.Breakdowns
+        spendingRecord.Borroweds = data.Borroweds
+        spendingRecord.Lents = data.Lents
+        setSpendings((oldValue) => {
+            return [
+                spendingRecord,
+                ...oldValue,
+            ]
+        })
+    }, [])
 
     return (
         <div>
@@ -34,13 +66,14 @@ const Spendings = () => {
                         >
                             <input
                                 onChange={searchHandler}
+                                value={searchText}
                                 type="text"
                                 placeholder="Search for any record by date (12-12-2022), description or amount"
                                 className="p-2 bg-transparent outline-none w-full"
                             />
                             <span style={{ width: "50px" }}>
                                 <FaSearch
-                                    onClick={() => searchHandler()}
+                                    onClick={searchHandler}
                                     className="mt-3 text-gray-500 dark:text-gray-400 text-xl cursor-pointer"
                                 />
                             </span>
@@ -50,30 +83,30 @@ const Spendings = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-6 w-full justify-around gap-6">
                 {/* <div className="bg-gray-300 dark:bg-dark rounded-sm w-full p-4" style={{ width: '100vw', maxWidth: '600px' }}> */}
-                <div className="md:col-span-4 bg-gray-300 dark:bg-dark rounded-sm p-4">
+                {!loading && <div className="md:col-span-4 bg-gray-300 dark:bg-dark rounded-sm p-4">
                     <table className="w-full table-auto border-collapse border-black">
                         <thead>
                             <tr>
                                 <th>S/N</th>
                                 <th>Amount</th>
                                 <th>Date</th>
-                                <th>Description</th>
+                                <th>Items</th>
                                 <th>Action</th>
                             </tr>
 
                         </thead>
                         <tbody>
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) => (
-                                <tr className="text-center">
-                                    <td className="border-b p-2 border-r">{index}</td>
-                                    <td className="border-b">₦ 2,000</td>
+                            {spendings.map((spending, index) => (
+                                <tr className="text-center" key={index}>
+                                    <td className="border-b p-2 border-r">{index + 1}</td>
+                                    <td className="border-b">₦ {spending.amount.toLocaleString()}</td>
                                     <td className="border-b">
-                                        <Moment format="Do ddd YYYY HH:mm">1976-04-19T12:59-0500</Moment>
+                                        <Moment format="Do ddd YYYY HH:mm">{spending.date}</Moment>
                                     </td>
-                                    <td className="border-b">SPent on bread, books, water, blanket....</td>
+                                    <td className="border-b">{getDescriptionText(spending.Breakdowns)}</td>
                                     <td className="border-b text-right">
                                         <FaEdit
-                                            onClick={() => searchHandler()}
+                                            onClick={searchHandler}
                                             className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center"
                                         />
                                     </td>
@@ -81,26 +114,27 @@ const Spendings = () => {
                             ))}
                         </tbody>
                     </table>
-                </div>
+                </div>}
+                {loading && <p>Loading Spending records. please wait</p>}
                 <div className="md:col-span-2">
                     <div className="bg-gray-300 dark:bg-dark rounded-sm w-full p-4 mb-3">
                         <div className="text-left dark:text-primary text-main mb-2">Quick Add</div>
-                        <div class="flex justify-left">
-                            <form class="">
-                                <div class="text-left mb-3">
+                        <div className="flex justify-left">
+                            <form className="">
+                                <div className="text-left mb-3">
                                     <label className="">Amount *</label>
                                     <input className="mt-1 p-1.5 rounded-sm dark:bg-black bg-gray-200 outline-none w-full" />
                                 </div>
-                                <div class="text-left mb-3">
+                                <div className="text-left mb-3">
                                     <label className="">Description</label>
                                     <input className="mt-1 p-1.5 rounded-sm dark:bg-black bg-gray-200 outline-none w-full" />
                                 </div>
-                                <div class="text-left mb-3">
+                                <div className="text-left mb-3">
                                     <label className="">Date</label>
                                     <input className="mt-1 p-1.5 rounded-sm dark:bg-black bg-gray-200 outline-none w-full" />
                                 </div>
-                                <button class="w-full dark:bg-primary text-white bg-main px-2 py-2 rounded-md mb-2 opacity-90 hover:opacity-100">Submit</button>
-                                <CreateSpending />
+                                <button className="w-full dark:bg-primary text-white bg-main px-2 py-2 rounded-md mb-2 opacity-90 hover:opacity-100">Submit</button>
+                                <CreateSpending addSpending={addSpending}/>
                             </form>
                         </div>
                     </div>
@@ -119,8 +153,6 @@ const Spendings = () => {
                     </LineChart>
                 </div>
             </div>
-
-            
         </div>
     );
 };

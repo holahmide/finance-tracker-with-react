@@ -9,6 +9,7 @@ import GuestRoute from "./components/GuestRoute";
 
 function App() {
   // const context = useContext(AuthContext);
+
   return (
     <div className="App dark:text-white  transition-all">
       <AuthProvider>
@@ -26,9 +27,6 @@ function App() {
                       exact
                       element={<Navigate replace to="/login" />}
                     />
-                    {/* <Route path="/login" element={<GuestRoute />}>
-                      <Route element={<Login />} />
-                    </Route> */}
                     <Route
                       path="/login"
                       element={
