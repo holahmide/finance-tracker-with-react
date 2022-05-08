@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { FaTimes } from "react-icons/fa";
-import { AuthContext } from '../../context/AuthContext';
-import SpendingService from '../../services/spending-service';
-import Modal from './modal'
+import { AuthContext } from '../context/AuthContext';
+import SpendingService from '../services/spending-service';
+import Modal from './UI/modal'
 
 let currentDate = new Date()
 currentDate = currentDate.getFullYear() + "-" + ("0" + (currentDate.getMonth() + 1)).slice(-2) + "-" + ("0" + currentDate.getDate()).slice(-2)

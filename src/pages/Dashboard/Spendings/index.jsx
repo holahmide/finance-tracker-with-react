@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { FaSearch, FaEdit } from "react-icons/fa";
 import Moment from "react-moment";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from 'recharts';
-import CreateSpending from "../../../components/UI/CreateSpending";
+import CreateSpending from "../../../components/CreateSpending";
 import SpendingService from "../../../services/spending-service";
+import EditSpending from "../../../components/EditSpending";
 
 const data = [{ name: 'Jan 2021', uv: 400, pv: 2400, amt: 2400 }, { name: 'Feb 2021', uv: 100, pv: 2100, amt: 200 }, { name: 'Mar 2021', uv: 300, pv: 100, amt: 2000 }];
 
@@ -11,6 +12,8 @@ const Spendings = () => {
     const [searchText, setSearchText] = useState('');
     const [loading, setLoading] = useState(true);
     const [spendings, setSpendings] = useState([]);
+    const [editModal, setEditModal] = useState(false);
+    const [activeEditSpending, setActiveEditSpending] = useState(false);
 
     useEffect(() => {
         const initialSetup = async () => {
@@ -29,7 +32,7 @@ const Spendings = () => {
         let items = ''
         breakdowns.map((breakdown, index) => {
             if (breakdown.item) {
-                if (index === breakdowns.length-1) {
+                if (index === breakdowns.length - 1) {
                     items += breakdown.item
                 }
                 else items += breakdown.item + ', '
@@ -52,8 +55,39 @@ const Spendings = () => {
         })
     }, [])
 
+    const updateSpending = useCallback((data) => {
+        let spendingRecord = data.spending
+        spendingRecord.Breakdowns = data.Breakdowns
+        spendingRecord.Borroweds = data.Borroweds
+        spendingRecord.Lents = data.Lents
+        setSpendings((oldValue) => {
+            console.log(oldValue)
+            console.log(spendingRecord.id)
+            let findIndex = oldValue.findIndex(el => el.id === Number(spendingRecord.id))
+            console.log(findIndex)
+            oldValue[findIndex] = spendingRecord
+            console.log(oldValue)
+            return [
+                ...oldValue,
+            ]
+        })
+    }, [])
+
+    const showEditSpending = (spending) => {
+        setActiveEditSpending(() => spending)
+        setEditModal(() => true)
+    }
+
+    const hideEditSpending = () => {
+        setEditModal(() => false)
+        setActiveEditSpending(() => null)
+    }
+
     return (
         <div>
+            {editModal &&
+                <EditSpending spending={activeEditSpending} updateSpending={updateSpending} close={hideEditSpending} />
+            }
             <div className="mb-3">
                 <div className="text-left font-bold text-xl mb-1 text-main dark:text-primary w-full">
                     All Spendings
@@ -106,7 +140,7 @@ const Spendings = () => {
                                     <td className="border-b">{getDescriptionText(spending.Breakdowns)}</td>
                                     <td className="border-b text-right">
                                         <FaEdit
-                                            onClick={searchHandler}
+                                            onClick={() => showEditSpending(spending)}
                                             className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center"
                                         />
                                     </td>
@@ -134,7 +168,7 @@ const Spendings = () => {
                                     <input className="mt-1 p-1.5 rounded-sm dark:bg-black bg-gray-200 outline-none w-full" />
                                 </div>
                                 <button className="w-full dark:bg-primary text-white bg-main px-2 py-2 rounded-md mb-2 opacity-90 hover:opacity-100">Submit</button>
-                                <CreateSpending addSpending={addSpending}/>
+                                <CreateSpending addSpending={addSpending} />
                             </form>
                         </div>
                     </div>
