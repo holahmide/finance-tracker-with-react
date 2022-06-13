@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { FaSearch, FaEdit, FaTrash } from "react-icons/fa";
+import { FaSearch, FaEdit } from "react-icons/fa";
 import Moment from "react-moment";
 // import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
-import CreateSpending from "../../../components/Spending/CreateSpending";
-import SpendingService from "../../../services/spending-service";
-import EditSpending from "../../../components/Spending/EditSpending";
-import Modal from "../../../components/UI/modal";
+import SpendingActionsService from "../../../services/spending-actions-service";
+// import Modal from "../../../components/UI/modal";
 import toast from "react-hot-toast";
 import Loader from "../../../components/UI/loader";
+import CreateSpendingAction from "../../../components/SpendingAction/CreateSpendingAction";
+import EditSpendingAction from "../../../components/SpendingAction/EditSpendingAction";
 
 // const data = [
 //     { name: "Jan 2021", uv: 400, pv: 2400, amt: 2400 },
@@ -23,14 +23,14 @@ currentDate =
     ("0" + currentDate.getDate()).slice(-2);
 const dateFormat = "Do ddd YYYY HH:mm";
 
-const Spendings = () => {
+const Lents = () => {
     const [searchText, setSearchText] = useState("");
     const [loading, setLoading] = useState(true);
-    const [spendings, setSpendings] = useState([]);
+    const [lents, setLents] = useState([]);
     const [editModal, setEditModal] = useState(false);
-    const [deleteModal, setDeleteModal] = useState(false);
-    const [activeEditSpending, setActiveEditSpending] = useState(false);
-    const [activeDeleteSpending, setActiveDeleteSpending] = useState(false);
+    // const [deleteModal, setDeleteModal] = useState(false);
+    const [activeEditLent, setActiveEditLent] = useState(false);
+    // const [activeDeleteLent, setActiveDeleteLent] = useState(false);
     const [requestState, setRequestState] = useState(false);
 
     // Quick Add
@@ -40,8 +40,8 @@ const Spendings = () => {
 
     useEffect(() => {
         const initialSetup = async () => {
-            const response = await SpendingService.fetchAll();
-            setSpendings(response.data.spendings.reverse().splice(0, 10));
+            const response = await SpendingActionsService.fetchLents();
+            setLents(response.data.lents.reverse().splice(0, 10));
             setLoading(() => false);
         };
         initialSetup();
@@ -51,87 +51,68 @@ const Spendings = () => {
         setSearchText(() => event.target.value);
     };
 
-    const getDescriptionText = useCallback((breakdowns) => {
-        let items = "";
-        breakdowns.map((breakdown, index) => {
-            if (breakdown.item) {
-                if (index === breakdowns.length - 1) {
-                    items += breakdown.item;
-                } else items += breakdown.item + ", ";
-            }
-            return true;
-        });
-        return items;
-    }, []);
-
-    const addSpending = useCallback((data) => {
-        let spendingRecord = data.spending;
-        spendingRecord.Breakdowns = data.Breakdowns;
-        spendingRecord.Borroweds = data.Borroweds;
-        spendingRecord.Lents = data.Lents;
-        setSpendings((oldValue) => {
-            return [spendingRecord, ...oldValue];
+    const addLents = useCallback((data) => {
+        let lentRecords = data.lents;
+        setLents((oldValue) => {
+            return [...lentRecords, ...oldValue];
         });
     }, []);
 
-    const updateSpending = useCallback((data) => {
-        let spendingRecord = data.spending;
-        spendingRecord.Breakdowns = data.Breakdowns;
-        spendingRecord.Borroweds = data.Borroweds;
-        spendingRecord.Lents = data.Lents;
-        setSpendings((oldValue) => {
+    const updateLent = useCallback((data) => {
+        let lentRecord = data.lent;
+        setLents((oldValue) => {
             let findIndex = oldValue.findIndex(
-                (el) => el.id === Number(spendingRecord.id)
+                (el) => el.id === Number(lentRecord.id)
             );
-            oldValue[findIndex] = spendingRecord;
+            oldValue[findIndex] = lentRecord;
             return [...oldValue];
         });
     }, []);
 
-    const showEditSpending = useCallback((spending) => {
-        setActiveEditSpending(() => spending);
+    const showEditLent = useCallback((lent) => {
+        setActiveEditLent(() => lent);
         setEditModal(() => true);
     }, []);
 
-    const hideEditSpending = useCallback(() => {
+    const hideEditLent = useCallback(() => {
         setEditModal(() => false);
-        setActiveEditSpending(() => null);
+        setActiveEditLent(() => null);
     }, []);
 
-    const confirmDeleteSpending = useCallback(
-        (id) => {
-            const findIndex = spendings.findIndex((el) => el.id === id);
-            setActiveDeleteSpending(() => spendings[findIndex])
-            setDeleteModal(true);
-        },
-        [spendings]
-    );
+    // const confirmDeleteSpending = useCallback(
+    //     (id) => {
+    //         const findIndex = lents.findIndex((el) => el.id === id);
+    //         setActiveDeleteLent(() => lents[findIndex])
+    //         setDeleteModal(true);
+    //     },
+    //     [lents]
+    // );
 
-    const hideDeleteModal = useCallback(() => {
-        setDeleteModal(false)
-    }, [])
+    // const hideDeleteModal = useCallback(() => {
+    //     setDeleteModal(false)
+    // }, [])
 
-    const deleteSpending = useCallback(async (id) => {
-        const findIndex = spendings.findIndex((el) => el.id === id);
+    // const deleteLent = useCallback(async (id) => {
+    //     const findIndex = lents.findIndex((el) => el.id === id);
 
-        setRequestState(() => true)
-        // Backend
-        try {
-            await SpendingService.delete(spendings[findIndex]);
-            setSpendings((oldValue) => {
-                oldValue.splice(findIndex, 1);
-                return [
-                    ...oldValue
-                ]
-            })
-            toast.success("Successfully deleted spending record")
-            hideDeleteModal()
-        } catch (error) {
-            toast.error("Couldn't delete record")
-        } finally {
-            setRequestState(() => false)
-        }
-    }, [hideDeleteModal, spendings])
+    //     setRequestState(() => true)
+    //     // Backend
+    //     try {
+    //         await SpendingActionsService.deleteLent(lents[findIndex]);
+    //         setLents((oldValue) => {
+    //             oldValue.splice(findIndex, 1);
+    //             return [
+    //                 ...oldValue
+    //             ]
+    //         })
+    //         toast.success("Successfully deleted lent record")
+    //         hideDeleteModal()
+    //     } catch (error) {
+    //         toast.error("Couldn't delete record")
+    //     } finally {
+    //         setRequestState(() => false)
+    //     }
+    // }, [hideDeleteModal, lents])
 
     const amountInputHandler = useCallback((event) => {
         setAmount(() => event.target.value)
@@ -154,23 +135,16 @@ const Spendings = () => {
 
         setRequestState(() => true)
 
-        let spending = {
+        let lent = [{
             amount: amount,
             date: date,
-            breakdowns: [
-                {
-                    price: amount,
-                    item: description
-                }
-            ],
-            lents: [],
-            borroweds: []
-        };
+            description: description,
+        }];
 
         try {
-            const response = await SpendingService.create(spending);
-            addSpending(response.data);
-            toast.success("Successfully added spent record")
+            const response = await SpendingActionsService.createLent(lent);
+            addLents(response.data);
+            toast.success("Successfully added lent record")
             setAmount(() => '');
             setDescription(() => '')
             setDate(() => currentDate)
@@ -179,36 +153,37 @@ const Spendings = () => {
         } finally {
             setRequestState(() => false)
         }
-    }, [addSpending, amount, date, description])
+    }, [addLents, amount, date, description])
 
     return (
         <div>
             {<Loader show={requestState}></Loader>}
             {editModal && (
-                <EditSpending
-                    spending={activeEditSpending}
-                    updateSpending={updateSpending}
-                    close={hideEditSpending}
+                <EditSpendingAction
+                type={'Lent'}
+                    spendingAction={activeEditLent}
+                    updateSpendingAction={updateLent}
+                    close={hideEditLent}
                     setRequestState={setRequestState}
                 />
             )}
-            {deleteModal && (
+            {/* {deleteModal && (
                 <Modal closeModal={hideDeleteModal}>
-                    <div className="text-left font-bold text-lg ">Delete Spending Record</div>
+                    <div className="text-left font-bold text-lg ">Delete Lent Record</div>
                     <div className="mt-3">
-                        Are you sure you want to remove this spent record of ₦ {activeDeleteSpending.amount.toLocaleString()} on <Moment format={dateFormat}>{activeDeleteSpending.date}</Moment>?
+                        Are you sure you want to remove this lent record of ₦ {activeDeleteLent.amount.toLocaleString()} on <Moment format={dateFormat}>{activeDeleteLent.date}</Moment>?
                     </div>
                     <div className="flex justify-end mt-4">
                         <div>
                             <button onClick={hideDeleteModal} className="mx-2 bg-transparent border-2 dark:border-red-900 border-black  px-4 py-1.5 rounded-md">Cancel</button>
-                            <button onClick={() => deleteSpending(activeDeleteSpending.id)} className="mx-2 bg-red-900 text-white border-2 border-red-900 px-4 py-1.5 rounded-md">Delete</button>
+                            <button onClick={() => deleteLent(activeDeleteLent.id)} className="mx-2 bg-red-900 text-white border-2 border-red-900 px-4 py-1.5 rounded-md">Delete</button>
                         </div>
                     </div>
                 </Modal>
-            )}
+            )} */}
             <div className="mb-3">
                 <div className="text-left font-bold text-xl mb-1 text-main dark:text-primary w-full">
-                    ALL YOUR SPENDING RECORDS
+                    ALL YOUR LENT RECORDS
                 </div>
                 <div className="text-left">
                     <form>
@@ -248,29 +223,29 @@ const Spendings = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {spendings.map((spending, index) => (
+                                {lents.map((lent, index) => (
                                     <tr className="text-center" key={index}>
                                         <td className="border-b p-2 border-r">{index + 1}</td>
                                         <td className="border-b">
-                                            ₦ {spending.amount.toLocaleString()}
+                                            ₦ {lent.amount.toLocaleString()}
                                         </td>
                                         <td className="border-b">
                                             <Moment format={dateFormat}>
-                                                {spending.date}
+                                                {lent.date}
                                             </Moment>
                                         </td>
                                         <td className="border-b">
-                                            {getDescriptionText(spending.Breakdowns)}
+                                            {lent.description}
                                         </td>
                                         <td className="border-b text-right">
                                             <FaEdit
-                                                onClick={() => showEditSpending(spending)}
+                                                onClick={() => showEditLent(lent)}
                                                 className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center inline mx-2"
                                             />
-                                            <FaTrash
-                                                onClick={() => confirmDeleteSpending(spending.id)}
+                                            {/* <FaTrash
+                                                onClick={() => confirmDeleteSpending(lent.id)}
                                                 className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center inline mx-2"
-                                            />
+                                            /> */}
                                         </td>
                                     </tr>
                                 ))}
@@ -278,7 +253,7 @@ const Spendings = () => {
                         </table>
                     </div>
                 )}
-                {loading && <p>Loading Spending records. please wait</p>}
+                {loading && <p>Loading lent records. please wait</p>}
                 <div className="md:col-span-2">
                     <div className="bg-gray-300 dark:bg-dark rounded-sm w-full p-4 mb-3">
                         <div className="text-left dark:text-primary text-main mb-2">
@@ -301,7 +276,7 @@ const Spendings = () => {
                                 <button type="submit" className="w-full dark:bg-primary text-white bg-main px-2 py-2 rounded-md mb-2 opacity-90 hover:opacity-100">
                                     Submit
                                 </button>
-                                <CreateSpending addSpending={addSpending} setRequestState={setRequestState} />
+                                <CreateSpendingAction type={'Lent'} addSpendingAction={addLents} setRequestState={setRequestState} />
                             </form>
                         </div>
                     </div>
@@ -326,4 +301,4 @@ const Spendings = () => {
     );
 };
 
-export default Spendings;
+export default Lents;

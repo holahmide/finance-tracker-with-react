@@ -12,6 +12,12 @@ const AuthService = {
     },
     logout () {
         return api.get('auth/logout');
+    },
+    update (credentials, id) {
+        return api.put(`auth/edit/${id}`, credentials)
+    },
+    changePassword (credentials) {
+        return api.post(`auth/change_password`, credentials)
     }
 }
 

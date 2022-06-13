@@ -1,25 +1,26 @@
 import { useContext } from "react";
 import { FaUserAlt } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import classes from './sideBar.module.css';
+import { AuthContext } from "../context/AuthContext";
 
 const SideBar = ({ sideBar }) => {
     const context = useContext(AuthContext);
     const { pathname } = useLocation();
+    const activeLink = 'w-full p-2 bg-main text-white dark:bg-primary dark:hover:bg-primary hover:bg-main rounded-md mb-3 pl-6';
+    const link = 'w-full p-2 dark:bg-black bg-tertiary-1 hover:bg-main dark:hover:bg-primary rounded-md mb-3 pl-6';
 
     const linkStyle = (path) => {
         if (!path) {
             // For dashbaord
-            return !pathname.split("/")[2] ? classes.activeLink : classes.link;
+            return !pathname.split("/")[2] ? activeLink : link;
         }
-        return pathname.split("/")[2] === path ? classes.activeLink : classes.link;
+        return pathname.split("/")[2] === path ? activeLink : link;
     }
 
     return (
         <div
             className={`${sideBar ? "" : "hidden"
-                } overflow-y-auto fixed md:relative md:block dark:bg-dark bg-gray-300 shadow-xl z-40 p-5 flex justify-center`}
+                } overflow-y-auto fixed md:relative md:block dark:bg-dark bg-gray-300 shadow-xl z-30 p-5 flex justify-center`}
             style={{
                 height: "100vh",
                 width: "100vw",
@@ -43,16 +44,16 @@ const SideBar = ({ sideBar }) => {
                     <Link to="/dashboard/spendings">
                         <div className={linkStyle("spendings")}>Spendings</div>
                     </Link>
-                    <Link to="/">
+                    <Link to="/dashboard/lents">
                         <div className={linkStyle("lents")}>Lent</div>
                     </Link>
-                    <Link to="/">
+                    <Link to="/dashboard/borroweds">
                         <div className={linkStyle("borroweds")}>Borrowed</div>
                     </Link>
-                    <Link to="/">
+                    <Link to="/dashboard/limits">
                         <div className={linkStyle("limits")}>Limit</div>
                     </Link>
-                    <Link to="/">
+                    <Link to="/dashboard/profile">
                         <div className={linkStyle("profile")}>Profile</div>
                     </Link>
 

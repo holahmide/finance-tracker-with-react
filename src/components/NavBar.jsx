@@ -6,9 +6,12 @@ import { AuthContext } from "../context/AuthContext";
 const NavBar = () => {
     const {logoutUser} = useContext(AuthContext);
     return (
+        // <div
+        //     className="bg-gray-200 dark:bg-dark dark:shadow-lg w-full"
+        //     style={{ width: "100%" }}
+        // >
         <div
-            className="bg-gray-200 dark:bg-dark shadow-lg w-full"
-            style={{ width: "100%" }}
+            className="fixed bg-gray-200 dark:bg-dark dark:shadow-lg md:left-[300px] md:right-[0] w-full md:w-auto top-0"
         >
             <div className="flex justify-between w-full px-6 py-4">
                 <div className="flex">

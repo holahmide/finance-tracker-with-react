@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 let currentDate = new Date();
 currentDate =
@@ -10,13 +10,13 @@ currentDate =
     ("0" + currentDate.getDate()).slice(-2);
 
 const fields = {
-    breakdown: {
+    Breakdowns: {
         pageId: null,
         item: "",
         price: "",
         quantity: 1,
     },
-    borrowed: {
+    Borroweds: {
         pageId: null,
         amount: "",
         description: "",
@@ -24,7 +24,7 @@ const fields = {
         repay_date: "",
         user_id: null,
     },
-    lent: {
+    Lents: {
         pageId: null,
         amount: "",
         description: "",
@@ -43,9 +43,11 @@ const useSpending = (user) => {
     const [date, setDate] = useState(currentDate);
     const [amount, setAmount] = useState(0);
 
-    const [borroweds, setBorroweds] = useState([]);
-    const [breakdowns, setBreakdowns] = useState([]);
-    const [lents, setLents] = useState([]);
+    const [spending, setSpending] = useState({
+        Borroweds: [],
+        Breakdowns: [],
+        Lents: [],
+    });
 
     const [removedFields, setRemovedFields] = useState({
         Breakdowns: [],
@@ -54,62 +56,59 @@ const useSpending = (user) => {
     });
 
     const addFields = useCallback(
-        (type = "breakdown", length = 1) => {
+        (type = "Breakdowns", length = 1) => {
             let newFields = [];
             let formField = Object.assign({}, fields[type]);
             formField.user_id = user.id;
             formField.date = currentDate;
+
             let countBreakdown = breakdownCounter;
             let countBorrowed = borrowedCounter;
             let countLent = lentCounter;
 
             for (let i = 0; i < length; i++) {
-                if (type === "breakdown") {
+                if (type === "Breakdowns") {
                     formField.pageId = countBreakdown;
                     countBreakdown += 1;
-                } else if (type === "borrowed") {
+                } else if (type === "Borroweds") {
                     formField.pageId = countBorrowed;
                     countBorrowed += 1;
-                } else if (type === "lent") {
+                } else if (type === "Lents") {
                     formField.pageId = countLent;
                     countLent += 1;
                 }
                 newFields.push(JSON.parse(JSON.stringify(formField)));
             }
-            if (type === "breakdown") {
-                setBreakdowns((old) => {
-                    return [...old, ...newFields];
-                });
-                setBreakdownCounter((oldValue) => countBreakdown);
-            } else if (type === "borrowed") {
-                setBorroweds((old) => {
-                    return [...old, ...newFields];
-                });
-                setBorrowedCounter((oldValue) => countBorrowed);
-            } else if (type === "lent") {
-                setLents((old) => {
-                    return [...old, ...newFields];
-                });
-                setLentCounter((oldValue) => countLent);
-            }
+
+            if (type === "Breakdowns") setBreakdownCounter(() => countBreakdown);
+            else if (type === "Borroweds") setBorrowedCounter(() => countBorrowed);
+            else if (type === "Lents") setLentCounter(() => countLent);
+
+            setSpending((oldValue) => {
+                oldValue[type].push(...newFields);
+                return {
+                    ...oldValue,
+                };
+            });
         },
         [borrowedCounter, breakdownCounter, lentCounter, user]
     );
 
     useEffect(() => {
         let totalBreakdown = () =>
-            breakdowns.reduce(function (total, breakdown) {
+            spending.Breakdowns.reduce(function (total, breakdown) {
+                if (!Number(breakdown.quantity)) breakdown.quantity = 1
                 if (
                     isNaN(Number(breakdown.price)) ||
                     isNaN(Number(breakdown.quantity))
                 ) {
                     return total + 0;
                 } else {
-                    return total + Number(breakdown.price) * Number(breakdown.quantity);
+                    return total + (Number(breakdown.price) * Number(breakdown.quantity));
                 }
             }, 0);
         let totalBorrowed = () =>
-            borroweds.reduce(function (total, borrowed) {
+            spending.Borroweds.reduce(function (total, borrowed) {
                 if (!borrowed.amount || isNaN(Number(borrowed.amount))) {
                     return total + 0;
                 } else {
@@ -117,7 +116,7 @@ const useSpending = (user) => {
                 }
             }, 0);
         let totalLent = () =>
-            lents.reduce(function (total, lent) {
+            spending.Lents.reduce(function (total, lent) {
                 if (!lent.amount || isNaN(Number(lent.amount))) {
                     return total + 0;
                 } else {
@@ -125,44 +124,47 @@ const useSpending = (user) => {
                 }
             }, 0);
         setAmount(() => totalBreakdown() + totalLent() + totalBorrowed());
-    }, [breakdowns, borroweds, lents]);
+    }, [spending]);
 
     const initialCreateSetup = useCallback(() => {
-        addFields("breakdown", 2);
-        addFields("borrowed", 1);
-        addFields("lent", 1);
+        addFields("Breakdowns", 2);
+        addFields("Borroweds", 1);
+        addFields("Lents", 1);
     }, [addFields]);
 
     const initialEditSetup = (spending) => {
-        setBreakdowns(() => spending.Breakdowns)
-        setBorroweds(() => spending.Borroweds)
-        setLents(() => spending.Lents)
-        setAmount(() => spending.amount)
-        setDate(() => spending.date)
-        setId(() => spending.id)
-    }
+        setSpending((oldValue) => {
+            oldValue["Breakdowns"] = spending.Breakdowns ? spending.Breakdowns : [];
+            oldValue["Borroweds"] = spending.Borroweds ? spending.Borroweds : [];
+            oldValue["Lents"] = spending.Lents ? spending.Lents : [];
+            return {
+                ...oldValue,
+            };
+        });
+        setAmount(() => spending.amount);
+        setDate(() => spending.date);
+        setId(() => spending.id);
+    };
 
-    const inputChangeHandler = useCallback((value, id, type, field) => {
-        if (type === "breakdown") {
-            setBreakdowns((oldValue) => {
-                let findObject = oldValue.find((el) => el.pageId === id);
-                findObject[field] = value;
-                return [...oldValue];
+    const inputChangeHandler = useCallback(
+        (value, pageId, type, field, id = null) => {
+            setSpending((oldValue) => {
+                // let findObject = oldValue[type].find((el) => el.pageId === pageId);
+                // findObject[field] = value;
+                // return {...oldValue}
+                let findIndex = -1;
+                if (id) { // For old records of spending, that wont have a pageId
+                    findIndex = oldValue[type].findIndex((el) => Number(el.id) === id);
+                } else { // For new record assingned a page number
+                    findIndex = oldValue[type].findIndex((el) => el.pageId === pageId);
+                }
+
+                oldValue[type][findIndex][field] = value;
+                return { ...oldValue };
             });
-        } else if (type === "borrowed") {
-            setBorroweds((oldValue) => {
-                let findObject = oldValue.find((el) => el.pageId === id);
-                findObject[field] = value;
-                return [...oldValue];
-            });
-        } else if (type === "lent") {
-            setLents((oldValue) => {
-                let findObject = oldValue.find((el) => el.pageId === id);
-                findObject[field] = value;
-                return [...oldValue];
-            });
-        }
-    }, []);
+        },
+        []
+    );
 
     const dateChangeHandler = useCallback((event) => {
         setDate(() => event.target.value);
@@ -174,189 +176,244 @@ const useSpending = (user) => {
         });
     }, []);
 
-    const validateForm = useCallback((form) => {
-        let total = 0;
-        let errors = [];
-        let minor_errors = [];
-        let i = 0; //counter
+    const validateForm = useCallback(
+        (form) => {
+            let total = 0;
+            let errors = [];
+            let minor_errors = [];
+            let i = 0; //counter
 
-        let breakdowns = form.breakdowns;
-        for (i = 0; i < breakdowns.length; i++) {
-            if (breakdowns[i].price) {
-                if (!Number(breakdowns[i].price || !Number(breakdowns[i].quantity))) {
-                    errors.push(
-                        "The price/qauntity for field" + (i + 1) + " is not valid"
+            let breakdowns = form.breakdowns;
+            for (i = 0; i < breakdowns.length; i++) {
+                if (breakdowns[i].price) {
+                    if (!Number(breakdowns[i].price || !Number(breakdowns[i].quantity))) {
+                        errors.push(
+                            "The price/qauntity for field" + (i + 1) + " is not valid"
+                        );
+                    } else {
+                        breakdowns[i].price = parseInt(breakdowns[i].price);
+                        total += breakdowns[i].price * parseInt(breakdowns[i].quantity);
+                    }
+                } else if (breakdowns[i].item) {
+                    minor_errors.push(
+                        "You provided an item for breakdown in field " +
+                        (i + 1) +
+                        " of the table"
                     );
                 } else {
-                    breakdowns[i].price = parseInt(breakdowns[i].price);
-                    total += breakdowns[i].price * parseInt(breakdowns[i].quantity);
+                    breakdowns.splice(i, 1);
+                    i--;
                 }
-            } else if (breakdowns[i].item) {
-                minor_errors.push(
-                    "You provided an item for breakdown in field " +
-                    (i + 1) +
-                    " of the table"
+            }
+
+            let borroweds = form.borroweds;
+            for (i = 0; i < borroweds.length; i++) {
+                if (borroweds[i].amount) {
+                    if (!Number(borroweds[i].amount)) {
+                        errors.push("The price for field" + (i + 1) + " is not valid");
+                    } else {
+                        borroweds[i].amount = parseInt(borroweds[i].amount);
+                        total += borroweds[i].amount;
+                    }
+                } else if (borroweds[i].description || borroweds[i].repay_date) {
+                    if (borroweds[i].description) {
+                        minor_errors.push(
+                            "You provided a description for an amount(not specified) you borrowed in field " +
+                            (i + 1) +
+                            " of the lents table"
+                        );
+                    }
+                    if (borroweds[i].repay_date) {
+                        minor_errors.push(
+                            "You provided a repay_date for an amount(not specified) you borrowed in field " +
+                            (i + 1) +
+                            " of the lents table"
+                        );
+                    }
+                } else {
+                    borroweds.splice(i, 1);
+                    i--; // return to previous index to take care of the splicing
+                }
+            }
+
+            let lents = form.lents;
+            for (i = 0; i < lents.length; i++) {
+                if (lents[i].amount) {
+                    if (!Number(lents[i].amount)) {
+                        errors.push("The price for field" + (i + 1) + " is not valid");
+                        errors++;
+                    } else {
+                        lents[i].amount = parseInt(lents[i].amount);
+                        total += lents[i].amount;
+                    }
+                } else if (lents[i].description || lents[i].repay_date) {
+                    if (lents[i].description) {
+                        minor_errors.push(
+                            "You provided a description for an amount(not specified) you lent in field " +
+                            (i + 1) +
+                            " of the lents table"
+                        );
+                    }
+                    if (lents[i].repay_date) {
+                        minor_errors.push(
+                            "You provided a repay_date for an amount(not specified) you lent in field " +
+                            (i + 1) +
+                            " of the lents table"
+                        );
+                    }
+                } else {
+                    lents.splice(i, 1);
+                    i--;
+                }
+            }
+
+            form.amount = total;
+
+            if (errors.length > 0) {
+                showErrors(errors);
+                return false;
+            }
+
+            if (minor_errors.length > 0) {
+                showErrors(minor_errors);
+                return false;
+            }
+
+            if (!total) {
+                return showErrors(["The total amount is zero!"]);
+            }
+
+            return form;
+        },
+        [showErrors]
+    );
+
+    const validateSpendingAction = useCallback((form) => {
+        if (form.amount) {
+            if (!Number(form.amount)) {
+                toast("The price is not valid");
+                return false;
+            } else {
+                form.amount = parseInt(form.amount);
+            }
+        } else if (form.description || form.repay_date) {
+            if (form.description) {
+                toast(
+                    "You provided a description for an amount(not specified) you lent"
                 );
-            } else {
-                breakdowns.splice(i, 1);
-                i--;
+                return false;
             }
-        }
-
-        let borroweds = form.borroweds;
-        for (i = 0; i < borroweds.length; i++) {
-            if (borroweds[i].amount) {
-                if (!Number(borroweds[i].amount)) {
-                    errors.push("The price for field" + (i + 1) + " is not valid");
-                } else {
-                    borroweds[i].amount = parseInt(borroweds[i].amount);
-                    total += borroweds[i].amount;
-                }
-            } else if (borroweds[i].description || borroweds[i].repay_date) {
-                if (borroweds[i].description) {
-                    minor_errors.push(
-                        "You provided a description for an amount(not specified) you borrowed in field " +
-                        (i + 1) +
-                        " of the lents table"
-                    );
-                }
-                if (borroweds[i].repay_date) {
-                    minor_errors.push(
-                        "You provided a repay_date for an amount(not specified) you borrowed in field " +
-                        (i + 1) +
-                        " of the lents table"
-                    );
-                }
-            } else {
-                borroweds.splice(i, 1);
-                i--; // return to previous index to take care of the splicing
+            if (form.repay_date) {
+                toast(
+                    "You provided a repay_date for an amount(not specified) you lent"
+                );
+                return false;
             }
-        }
+        } else {
+            toast('The amount is required!')
 
-        let lents = form.lents;
-        for (i = 0; i < lents.length; i++) {
-            if (lents[i].amount) {
-                if (!Number(lents[i].amount)) {
-                    errors.push("The price for field" + (i + 1) + " is not valid");
-                    errors++;
-                } else {
-                    lents[i].amount = parseInt(lents[i].amount);
-                    total += lents[i].amount;
-                }
-            } else if (lents[i].description || lents[i].repay_date) {
-                if (lents[i].description) {
-                    minor_errors.push(
-                        "You provided a description for an amount(not specified) you lent in field " +
-                        (i + 1) +
-                        " of the lents table"
-                    );
-                }
-                if (lents[i].repay_date) {
-                    minor_errors.push(
-                        "You provided a repay_date for an amount(not specified) you lent in field " +
-                        (i + 1) +
-                        " of the lents table"
-                    );
-                }
-            } else {
-                lents.splice(i, 1);
-                i--;
-            }
-        }
-
-        form.amount = total;
-
-        if (errors.length > 0) {
-            showErrors(errors);
             return false;
         }
 
-        if (minor_errors.length > 0) {
-            showErrors(minor_errors);
-            return false;
-        }
-
-        if (!total) {
-            return showErrors(["The total amount is zero!"]);
-        }
-
-        return form;
-    }, [showErrors]);
+        return true
+    }, []);
 
     const reset = useCallback(() => {
         setBreakdownCounter(() => 1);
         setBorrowedCounter(() => 1);
         setLentCounter(() => 1);
         setAmount(() => 0);
-        setBreakdowns(() => []);
-        setBorroweds(() => []);
-        setLents(() => []);
+        setSpending((oldValue) => {
+            oldValue["Breakdowns"] = [];
+            oldValue["Breakdowns"] = [];
+            oldValue["Lents"] = [];
+            return {
+                ...oldValue,
+            };
+        });
         initialCreateSetup();
     }, [initialCreateSetup]);
 
-    const deleteField = useCallback((type, pageId, id) => {
-        let findIndex = null;
-        if (id) {
-            if (type === 'Breakdowns') {
-                findIndex = breakdowns.findIndex(el => el.id === id)
+    const deleteField = useCallback(
+        (type, pageId, id) => {
+            let findIndex = null;
+            if (id) {
+                findIndex = spending[type].findIndex((el) => el.id === id);
                 setRemovedFields((oldValue) => {
-                    oldValue[type].push(breakdowns[findIndex].id)
-                    return oldValue
-                })
-                // Delelte field from the spending object
-                setBreakdowns((oldValue) => {
-                    oldValue.splice(findIndex, 1)
-                    return [...oldValue]
-                })
+                    oldValue[type].push(spending[type][findIndex].id);
+                    return oldValue;
+                });
+                setSpending((oldValue) => {
+                    oldValue[type].splice(findIndex, 1);
+                    return { ...oldValue };
+                });
+                // if (type === 'Breakdowns') {
+                //     findIndex = breakdowns.findIndex(el => el.id === id)
+                //     setRemovedFields((oldValue) => {
+                //         oldValue[type].push(breakdowns[findIndex].id)
+                //         return oldValue
+                //     })
+                //     // Delelte field from the spending object
+                //     setBreakdowns((oldValue) => {
+                //         oldValue.splice(findIndex, 1)
+                //         return [...oldValue]
+                //     })
+                // }
+                // else if (type === 'Borroweds') {
+                //     findIndex = borroweds.findIndex(el => el.id === id)
+                //     setRemovedFields((oldValue) => {
+                //         oldValue[type].push(borroweds[findIndex].id)
+                //         return oldValue
+                //     })
+                //     // Delelte field from the spending object
+                //     setBorroweds((oldValue) => {
+                //         oldValue.splice(findIndex, 1)
+                //         return [...oldValue]
+                //     })
+                // }
+                // else if (type === 'Lents') {
+                //     findIndex = lents.findIndex(el => el.id === id)
+                //     setRemovedFields((oldValue) => {
+                //         oldValue[type].push(lents[findIndex].id)
+                //         return oldValue
+                //     })
+                //     // Delelte field from the spending object
+                //     setLents((oldValue) => {
+                //         oldValue.splice(findIndex, 1)
+                //         return [...oldValue]
+                //     })
+                // }
+            } else {
+                findIndex = spending[type].findIndex((el) => el.pageId === pageId);
+                setSpending((oldValue) => {
+                    oldValue[type].splice(findIndex, 1);
+                    return { ...oldValue };
+                });
+                // if (type === 'Breakdowns') {
+                //     findIndex = breakdowns.findIndex(el => el.pageId === pageId)
+                //     setBreakdowns((oldValue) => {
+                //         oldValue.splice(findIndex, 1)
+                //         return [...oldValue]
+                //     })
+                // }
+                // else if (type === 'Borroweds') {
+                //     findIndex = borroweds.findIndex(el => el.pageId === pageId)
+                //     setBorroweds((oldValue) => {
+                //         oldValue.splice(findIndex, 1)
+                //         return [...oldValue]
+                //     })
+                // }
+                // else if (type === 'Lents') {
+                //     findIndex = lents.findIndex(el => el.pageId === pageId)
+                //     setLents((oldValue) => {
+                //         oldValue.splice(findIndex, 1)
+                //         return [...oldValue]
+                //     })
+                // }
             }
-            else if (type === 'Borroweds') {
-                findIndex = borroweds.findIndex(el => el.id === id)
-                setRemovedFields((oldValue) => {
-                    oldValue[type].push(borroweds[findIndex].id)
-                    return oldValue
-                })
-                // Delelte field from the spending object
-                setBorroweds((oldValue) => {
-                    oldValue.splice(findIndex, 1)
-                    return [...oldValue]
-                })
-            }
-            else if (type === 'Lents') {
-                findIndex = lents.findIndex(el => el.id === id)
-                setRemovedFields((oldValue) => {
-                    oldValue[type].push(lents[findIndex].id)
-                    return oldValue
-                })
-                // Delelte field from the spending object
-                setLents((oldValue) => {
-                    oldValue.splice(findIndex, 1)
-                    return [...oldValue]
-                })
-            }
-        } else {
-            if (type === 'Breakdowns') {
-                findIndex = breakdowns.findIndex(el => el.pageId === pageId)
-                setBreakdowns((oldValue) => {
-                    oldValue.splice(findIndex, 1)
-                    return [...oldValue]
-                })
-            }
-            else if (type === 'Borroweds') {
-                findIndex = borroweds.findIndex(el => el.pageId === pageId)
-                setBorroweds((oldValue) => {
-                    oldValue.splice(findIndex, 1)
-                    return [...oldValue]
-                })
-            }
-            else if (type === 'Lents') {
-                findIndex = lents.findIndex(el => el.pageId === pageId)
-                setLents((oldValue) => {
-                    oldValue.splice(findIndex, 1)
-                    return [...oldValue]
-                })
-            }
-        }
-    }, [borroweds, breakdowns, lents])
+        },
+        [spending]
+    );
 
     return {
         breakdownCounter,
@@ -364,9 +421,7 @@ const useSpending = (user) => {
         lentCounter,
         date,
         amount,
-        borroweds,
-        breakdowns,
-        lents,
+        spending,
         initialCreateSetup,
         inputChangeHandler,
         dateChangeHandler,
@@ -376,8 +431,9 @@ const useSpending = (user) => {
 
         id,
         initialEditSetup,
+        validateSpendingAction,
         deleteField,
-        removedFields
+        removedFields,
     };
 };
 

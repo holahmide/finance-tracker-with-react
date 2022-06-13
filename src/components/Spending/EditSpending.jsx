@@ -1,95 +1,106 @@
 import { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
-import { FaTimes } from "react-icons/fa";
-import { AuthContext } from "../context/AuthContext";
-import SpendingService from "../services/spending-service";
-import Modal from "./UI/modal";
-import useSpending from "../hooks/use-spending";
+import { FaTrash } from "react-icons/fa";
+import { AuthContext } from "../../context/AuthContext";
+import SpendingService from "../../services/spending-actions-service";
+import Modal from "../UI/modal";
+import useSpending from "../../hooks/use-spending";
 
-const CreateSpending = ({ addSpending }) => {
+const formInputClass = 'outline-none dark:bg-dark bg-gray-100 p-2 rounded-md w-full mb-2'
+
+const EditSpending = ({ spending: spendingData, close, updateSpending, setRequestState }) => {
   const { user } = useContext(AuthContext);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal,] = useState(true);
+  const [spending] = useState(Object.assign({}, spendingData));
 
   const {
+    id,
     date,
     amount,
-    borroweds,
-    breakdowns,
-    lents,
+    spending: spendingObject,
+    deleteField,
     addFields,
-    initialCreateSetup,
+    initialEditSetup,
     inputChangeHandler,
     dateChangeHandler,
     validateForm,
+    removedFields,
     reset,
   } = useSpending(user);
 
   useEffect(() => {
     if (user) {
-      initialCreateSetup();
+      initialEditSetup(spending);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const recordSpending = async () => {
+
+  const editSpending = async () => {
     let form = {
-      date: date,
-      amount: 3000,
-      breakdowns: breakdowns,
-      borroweds: borroweds,
-      lents: lents,
+      id,
+      date,
+      amount,
+      breakdowns: spendingObject.Breakdowns,
+      borroweds: spendingObject.Borroweds,
+      lents: spendingObject.Lents,
     };
+
+    setRequestState(() => true)
     form = validateForm(JSON.parse(JSON.stringify(form)));
 
-    if (form) {
-      const response = await SpendingService.create(form);
+    try {
+      const response = await SpendingService.edit(
+        { data: form, removed: { breakdowns: removedFields.Breakdowns, borroweds: removedFields.Borroweds, lents: removedFields.Lents } },
+        form.id
+      );
       if (response.status === 201) {
-        setShowModal(() => false);
-        toast.success("Successfully added your spending record");
-        addSpending(response.data);
+        close();
+        toast.success("Successfully edited your spending record");
+        updateSpending(response.data);
         reset();
       }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setRequestState(() => false)
     }
   };
 
-  const openModal = () => {
-    setShowModal(true);
-  };
-
   const closeModal = () => {
-    setShowModal(false);
+    // setShowModal(false);
+    close();
   };
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={openModal}
-        className="w-full border-2 dark:border-primary border-main hover:bg-main hover:dark:bg-primary px-2 py-2 rounded-md"
-      >
-        Create Multiple
-      </button>
       {showModal && (
-        <Modal>
+        <Modal closeModal={closeModal}>
           <div>
-            <div className="text-left font-bold text-lg ">Create Spending</div>
-            <div className="absolute right-0 top-0 p-4">
-              <FaTimes
-                onClick={closeModal}
-                className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer"
-              />
-            </div>
+            <div className="text-left font-bold text-lg ">Edit Spending</div>
             <input
               onChange={dateChangeHandler}
               value={date}
               type="date"
-              className="mt-6 outline-none bg-dark p-2 rounded-md w-full mb-4"
+              className={`${formInputClass} mt-4 mb-2`}
               placeholder="Enter Date *"
             />
             <div style={{ minWidth: "300px", overlayY: "auto" }}>
-              {breakdowns.map((breakdown, index) => (
+              {spendingObject.Breakdowns.map((breakdown, index) => (
                 <div key={index}>
-                  <div className="mb-2 text-left">Item {index + 1}</div>
+                  <div className="mb-2 text-left">
+                    Item {index + 1} &nbsp;
+                    <FaTrash
+                      onClick={() =>
+                        deleteField(
+                          "Breakdowns",
+                          breakdown.pageId,
+                          breakdown.id
+                        )
+                      }
+                      className="text-red-500 dark:text-red-400 text-sm cursor-pointer inline"
+                    />
+                  </div>
                   <div className="pl-6" style={{ maxWidth: "500px" }}>
                     <input
                       type="number"
@@ -98,11 +109,12 @@ const CreateSpending = ({ addSpending }) => {
                         inputChangeHandler(
                           e.target.value,
                           breakdown.pageId,
-                          "breakdown",
-                          "price"
+                          "Breakdowns",
+                          "price",
+                          breakdown.id
                         )
                       }
-                      className="outline-none bg-dark p-2 rounded-md w-full mb-2"
+                      className={formInputClass}
                       placeholder="Enter Price *"
                     />
                     <input
@@ -111,11 +123,12 @@ const CreateSpending = ({ addSpending }) => {
                         inputChangeHandler(
                           e.target.value,
                           breakdown.pageId,
-                          "breakdown",
-                          "item"
+                          "Breakdowns",
+                          "item",
+                          breakdown.id
                         )
                       }
-                      className="outline-none bg-dark p-2 rounded-md w-full mb-2"
+                      className={formInputClass}
                       placeholder="Enter Item"
                     />
                   </div>
@@ -125,19 +138,25 @@ const CreateSpending = ({ addSpending }) => {
           </div>
           <button
             type="button"
-            onClick={() => addFields("breakdown")}
-            className="w-full bg-primary p-1.5 rounded-md"
+            onClick={() => addFields("Breakdowns")}
+            className="w-full dark:bg-primary bg-main p-1.5 rounded-md"
           >
             Add more spending records
           </button>
           <div className="mt-4">
-            <div className="text-left font-bold text-lg ">
-              Create Borrowed (if any)
-            </div>
+            <div className="text-left font-bold text-lg ">Borrowed</div>
             <div style={{ minWidth: "300px", overlayY: "auto" }}>
-              {borroweds.map((borrowed, index) => (
+              {spendingObject.Borroweds.map((borrowed, index) => (
                 <div key={index}>
-                  <div className="mb-2 text-left">Item {index + 1}</div>
+                  <div className="mb-2 text-left">
+                    Item {index + 1}&nbsp;
+                    <FaTrash
+                      onClick={() =>
+                        deleteField("Borroweds", borrowed.pageId, borrowed.id, borrowed.id)
+                      }
+                      className="text-red-500 dark:text-red-400 text-sm cursor-pointer inline"
+                    />
+                  </div>
                   <div className="pl-6" style={{ maxWidth: "500px" }}>
                     <input
                       type="number"
@@ -146,11 +165,12 @@ const CreateSpending = ({ addSpending }) => {
                         inputChangeHandler(
                           e.target.value,
                           borrowed.pageId,
-                          "borrowed",
-                          "amount"
+                          "Borroweds",
+                          "amount",
+                          borrowed.id
                         )
                       }
-                      className="outline-none bg-dark p-2 rounded-md w-full mb-2"
+                      className={formInputClass}
                       placeholder="Enter Amount *"
                     />
                     <input
@@ -159,11 +179,12 @@ const CreateSpending = ({ addSpending }) => {
                         inputChangeHandler(
                           e.target.value,
                           borrowed.pageId,
-                          "borrowed",
-                          "description"
+                          "Borroweds",
+                          "description",
+                          borrowed.id
                         )
                       }
-                      className="outline-none bg-dark p-2 rounded-md w-full mb-2"
+                      className={formInputClass}
                       placeholder="Enter Description"
                     />
                   </div>
@@ -173,19 +194,23 @@ const CreateSpending = ({ addSpending }) => {
           </div>
           <button
             type="button"
-            onClick={() => addFields("borrowed")}
-            className="w-full bg-primary p-1.5 rounded-md"
+            onClick={() => addFields("Borroweds")}
+            className="w-full dark:bg-primary bg-main p-1.5 rounded-md"
           >
             Add more borrowed records
           </button>
           <div className="mt-4">
-            <div className="text-left font-bold text-lg ">
-              Create Lent (if any)
-            </div>
+            <div className="text-left font-bold text-lg ">Lent</div>
             <div style={{ minWidth: "300px", overlayY: "auto" }}>
-              {lents.map((lent, index) => (
+              {spendingObject.Lents.map((lent, index) => (
                 <div key={index}>
-                  <div className="mb-2 text-left">Item {index + 1}</div>
+                  <div className="mb-2 text-left">
+                    Item {index + 1}&nbsp;
+                    <FaTrash
+                      onClick={() => deleteField("Lents", lent.pageId, lent.id)}
+                      className="text-red-500 dark:text-red-400 text-sm cursor-pointer inline"
+                    />
+                  </div>
                   <div className="pl-6" style={{ maxWidth: "500px" }}>
                     <input
                       type="number"
@@ -194,11 +219,12 @@ const CreateSpending = ({ addSpending }) => {
                         inputChangeHandler(
                           e.target.value,
                           lent.pageId,
-                          "lent",
-                          "amount"
+                          "Lents",
+                          "amount",
+                          lent.id
                         )
                       }
-                      className="outline-none bg-dark p-2 rounded-md w-full mb-2"
+                      className={formInputClass}
                       placeholder="Enter Amount *"
                     />
                     <input
@@ -207,11 +233,12 @@ const CreateSpending = ({ addSpending }) => {
                         inputChangeHandler(
                           e.target.value,
                           lent.pageId,
-                          "lent",
-                          "description"
+                          "Lents",
+                          "description",
+                          lent.id
                         )
                       }
-                      className="outline-none bg-dark p-2 rounded-md w-full mb-2"
+                      className={formInputClass}
                       placeholder="Enter Description"
                     />
                   </div>
@@ -221,8 +248,8 @@ const CreateSpending = ({ addSpending }) => {
           </div>
           <button
             type="button"
-            onClick={() => addFields("lent")}
-            className="w-full bg-primary p-1.5 rounded-md"
+            onClick={() => addFields("Lents")}
+            className="w-full dark:bg-primary bg-main p-1.5 rounded-md"
           >
             Add more lent records
           </button>
@@ -231,7 +258,7 @@ const CreateSpending = ({ addSpending }) => {
             <div className="w-1/2">
               <button
                 type="button"
-                onClick={recordSpending}
+                onClick={editSpending}
                 className="dark:bg-primary bg-main w-full rounded-sm py-1"
               >
                 Record
@@ -253,4 +280,4 @@ const CreateSpending = ({ addSpending }) => {
   );
 };
 
-export default CreateSpending;
+export default EditSpending;

@@ -1,6 +1,0 @@
-.activeLink {
-    @apply w-full p-2 dark:bg-primary bg-primary rounded-md mb-3 pl-6;
-}
-.link {
-    @apply w-full p-2 bg-black hover:bg-primary dark:hover:bg-primary rounded-md mb-3 pl-6;
-}
