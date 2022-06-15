@@ -45,13 +45,13 @@ const SideBar = ({ sideBar }) => {
                         <div className={linkStyle("spendings")}>Spendings</div>
                     </Link>
                     <Link to="/dashboard/lents">
-                        <div className={linkStyle("lents")}>Lent</div>
+                        <div className={linkStyle("lents")}>Lents</div>
                     </Link>
                     <Link to="/dashboard/borroweds">
-                        <div className={linkStyle("borroweds")}>Borrowed</div>
+                        <div className={linkStyle("borroweds")}>Borroweds</div>
                     </Link>
-                    <Link to="/dashboard/limits">
-                        <div className={linkStyle("limits")}>Limit</div>
+                    <Link to="/dashboard/limit">
+                        <div className={linkStyle("limit")}>Limit</div>
                     </Link>
                     <Link to="/dashboard/profile">
                         <div className={linkStyle("profile")}>Profile</div>

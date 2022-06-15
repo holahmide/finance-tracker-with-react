@@ -7,6 +7,7 @@ import DashboardIndex from "./dashboard";
 import Spendings from "./Spendings";
 import Lents from "./Lents";
 import Borroweds from "./Borroweds";
+import Limit from "./Limit";
 import Profile from "./Profile";
 
 const Dashboard = () => {
@@ -33,6 +34,7 @@ const Dashboard = () => {
                             <Route path="/spendings" exact element={<Spendings />} />
                             <Route path="/lents" exact element={<Lents />} />
                             <Route path="/borroweds" exact element={<Borroweds />} />
+                            <Route path="/limit" exact element={<Limit />} />
                             <Route path="/profile" exact element={<Profile />} />
                         </Routes>
                     </div>
