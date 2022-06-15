@@ -8,6 +8,7 @@ import EditSpendingAction from "../../../components/SpendingAction/EditSpendingA
 // import Modal from "../../../components/UI/modal";
 import toast from "react-hot-toast";
 import Loader from "../../../components/UI/loader";
+import usePagination from "../../../hooks/use-pagination";
 
 // const data = [
 //     { name: "Jan 2021", uv: 400, pv: 2400, amt: 2400 },
@@ -32,6 +33,9 @@ const Borroweds = () => {
     const [activeEditBorrowed, setActiveEditBorrowed] = useState(false);
     // const [activeDeleteBorrowed, setActiveDeleteBorrowed] = useState(false);
     const [requestState, setRequestState] = useState(false);
+    const [borrowedTable, setBorrowedTable] = useState([]);
+
+    const { paginationHTML } = usePagination({ data: borroweds, setData: setBorrowedTable, size: 5, span: 10 });
 
     // Quick Add
     const [amount, setAmount] = useState('');
@@ -41,7 +45,7 @@ const Borroweds = () => {
     useEffect(() => {
         const initialSetup = async () => {
             const response = await SpendingActionsService.fetchBorroweds();
-            setBorroweds(response.data.borroweds.reverse().splice(0, 10));
+            setBorroweds(response.data.borroweds.reverse());
             setLoading(() => false);
         };
         initialSetup();
@@ -223,7 +227,7 @@ const Borroweds = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {borroweds.map((borrowed, index) => (
+                                {borrowedTable.map((borrowed, index) => (
                                     <tr className="text-center" key={index}>
                                         <td className="border-b p-2 border-r">{index + 1}</td>
                                         <td className="border-b">
@@ -251,6 +255,8 @@ const Borroweds = () => {
                                 ))}
                             </tbody>
                         </table>
+                        {paginationHTML}
+                        {/* <Pagination data={{ data: borroweds, size: 5, span: 10 }} setData={setBorrowedTableData} /> */}
                     </div>
                 )}
                 {loading && <p>Loading borrowed records. please wait</p>}
