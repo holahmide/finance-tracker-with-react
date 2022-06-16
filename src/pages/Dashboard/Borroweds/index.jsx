@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { FaSearch, FaEdit } from "react-icons/fa";
+import { FaSearch, FaEdit, FaTrash } from "react-icons/fa";
 import Moment from "react-moment";
 // import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
 import CreateSpendingAction from "../../../components/SpendingAction/CreateSpendingAction";
 import SpendingActionsService from "../../../services/spending-actions-service";
 import EditSpendingAction from "../../../components/SpendingAction/EditSpendingAction";
-// import Modal from "../../../components/UI/modal";
 import toast from "react-hot-toast";
 import Loader from "../../../components/UI/loader";
 import usePagination from "../../../hooks/use-pagination";
+import Modal from "../../../components/UI/modal";
 
 // const data = [
 //     { name: "Jan 2021", uv: 400, pv: 2400, amt: 2400 },
@@ -29,13 +29,12 @@ const Borroweds = () => {
     const [loading, setLoading] = useState(true);
     const [borroweds, setBorroweds] = useState([]);
     const [editModal, setEditModal] = useState(false);
-    // const [deleteModal, setDeleteModal] = useState(false);
+    const [deleteModal, setDeleteModal] = useState(false);
     const [activeEditBorrowed, setActiveEditBorrowed] = useState(false);
-    // const [activeDeleteBorrowed, setActiveDeleteBorrowed] = useState(false);
+    const [activeDeleteBorrowed, setActiveDeleteBorrowed] = useState(false);
     const [requestState, setRequestState] = useState(false);
-    const [borrowedTable, setBorrowedTable] = useState([]);
 
-    const { paginationHTML } = usePagination({ data: borroweds, setData: setBorrowedTable, size: 5, span: 10 });
+    const { paginationHTML, pageData: borrowedTable } = usePagination({ data: borroweds, size: 5, span: 10 });
 
     // Quick Add
     const [amount, setAmount] = useState('');
@@ -83,40 +82,40 @@ const Borroweds = () => {
         setActiveEditBorrowed(() => null);
     }, []);
 
-    // const confirmDeleteSpending = useCallback(
-    //     (id) => {
-    //         const findIndex = borroweds.findIndex((el) => el.id === id);
-    //         setActiveDeleteBorrowed(() => borroweds[findIndex])
-    //         setDeleteModal(true);
-    //     },
-    //     [borroweds]
-    // );
+    const confirmDeleteSpending = useCallback(
+        (id) => {
+            const findIndex = borroweds.findIndex((el) => el.id === id);
+            setActiveDeleteBorrowed(() => borroweds[findIndex])
+            setDeleteModal(true);
+        },
+        [borroweds]
+    );
 
-    // const hideDeleteModal = useCallback(() => {
-    //     setDeleteModal(false)
-    // }, [])
+    const hideDeleteModal = useCallback(() => {
+        setDeleteModal(false)
+    }, [])
 
-    // const deleteBorrowed = useCallback(async (id) => {
-    //     const findIndex = borroweds.findIndex((el) => el.id === id);
+    const deleteBorrowed = useCallback(async (id) => {
+        const findIndex = borroweds.findIndex((el) => el.id === id);
 
-    //     setRequestState(() => true)
-    //     // Backend
-    //     try {
-    //         await SpendingActionsService.deleteBorrowed(borroweds[findIndex]);
-    //         setBorroweds((oldValue) => {
-    //             oldValue.splice(findIndex, 1);
-    //             return [
-    //                 ...oldValue
-    //             ]
-    //         })
-    //         toast.success("Successfully deleted borrowed record")
-    //         hideDeleteModal()
-    //     } catch (error) {
-    //         toast.error("Couldn't delete record")
-    //     } finally {
-    //         setRequestState(() => false)
-    //     }
-    // }, [hideDeleteModal, borroweds])
+        setRequestState(() => true)
+        // Backend
+        try {
+            await SpendingActionsService.deleteSpendingAction(borroweds[findIndex].id, 'borrowed');
+            setBorroweds((oldValue) => {
+                oldValue.splice(findIndex, 1);
+                return [
+                    ...oldValue
+                ]
+            })
+            toast.success("Successfully deleted borrowed record")
+            hideDeleteModal()
+        } catch (error) {
+            toast.error("Couldn't delete record")
+        } finally {
+            setRequestState(() => false)
+        }
+    }, [hideDeleteModal, borroweds])
 
     const amountInputHandler = useCallback((event) => {
         setAmount(() => event.target.value)
@@ -171,7 +170,7 @@ const Borroweds = () => {
                     setRequestState={setRequestState}
                 />
             )}
-            {/* {deleteModal && (
+            {deleteModal && (
                 <Modal closeModal={hideDeleteModal}>
                     <div className="text-left font-bold text-lg ">Delete Borrowed Record</div>
                     <div className="mt-3">
@@ -184,7 +183,7 @@ const Borroweds = () => {
                         </div>
                     </div>
                 </Modal>
-            )} */}
+            )}
             <div className="mb-3">
                 <div className="text-left font-bold text-xl mb-1 text-main dark:text-primary w-full">
                     ALL YOUR BORROWED RECORDS
@@ -246,10 +245,10 @@ const Borroweds = () => {
                                                 onClick={() => showEditBorrowed(borrowed)}
                                                 className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center inline mx-2"
                                             />
-                                            {/* <FaTrash
+                                            <FaTrash
                                                 onClick={() => confirmDeleteSpending(borrowed.id)}
                                                 className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center inline mx-2"
-                                            /> */}
+                                            />
                                         </td>
                                     </tr>
                                 ))}

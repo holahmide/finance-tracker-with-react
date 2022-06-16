@@ -25,8 +25,8 @@ const SpendingService = {
     editBorrowed(payload, id) {
         return api.put(`spendings/borroweds/edit/${id}`, payload)
     },
-    deleteBorrowed(payload) {
-        return api.delete(`spendings/borroweds/delete/${payload.id}`, payload)
+    deleteSpendingAction(id, type) {
+        return api.delete(`spendings/delete/${type}/${id}`)
     },
 
     // Limits
