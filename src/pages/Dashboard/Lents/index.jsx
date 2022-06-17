@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { FaSearch, FaEdit } from "react-icons/fa";
+import { FaSearch, FaEdit, FaTrash } from "react-icons/fa";
 import Moment from "react-moment";
 // import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
 import SpendingActionsService from "../../../services/spending-actions-service";
-// import Modal from "../../../components/UI/modal";
 import toast from "react-hot-toast";
 import Loader from "../../../components/UI/loader";
 import CreateSpendingAction from "../../../components/SpendingAction/CreateSpendingAction";
 import EditSpendingAction from "../../../components/SpendingAction/EditSpendingAction";
+import Modal from "../../../components/UI/modal";
+import usePagination from "../../../hooks/use-pagination";
 
 // const data = [
 //     { name: "Jan 2021", uv: 400, pv: 2400, amt: 2400 },
@@ -28,9 +29,9 @@ const Lents = () => {
     const [loading, setLoading] = useState(true);
     const [lents, setLents] = useState([]);
     const [editModal, setEditModal] = useState(false);
-    // const [deleteModal, setDeleteModal] = useState(false);
+    const [deleteModal, setDeleteModal] = useState(false);
     const [activeEditLent, setActiveEditLent] = useState(false);
-    // const [activeDeleteLent, setActiveDeleteLent] = useState(false);
+    const [activeDeleteLent, setActiveDeleteLent] = useState(false);
     const [requestState, setRequestState] = useState(false);
 
     // Quick Add
@@ -38,10 +39,12 @@ const Lents = () => {
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(currentDate);
 
+    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: lents, size: 5, span: 10 });
+
     useEffect(() => {
         const initialSetup = async () => {
             const response = await SpendingActionsService.fetchLents();
-            setLents(response.data.lents.reverse().splice(0, 10));
+            setLents(response.data.lents.reverse());
             setLoading(() => false);
         };
         initialSetup();
@@ -79,40 +82,40 @@ const Lents = () => {
         setActiveEditLent(() => null);
     }, []);
 
-    // const confirmDeleteSpending = useCallback(
-    //     (id) => {
-    //         const findIndex = lents.findIndex((el) => el.id === id);
-    //         setActiveDeleteLent(() => lents[findIndex])
-    //         setDeleteModal(true);
-    //     },
-    //     [lents]
-    // );
+    const confirmDeleteSpending = useCallback(
+        (id) => {
+            const findIndex = lents.findIndex((el) => el.id === id);
+            setActiveDeleteLent(() => lents[findIndex])
+            setDeleteModal(true);
+        },
+        [lents]
+    );
 
-    // const hideDeleteModal = useCallback(() => {
-    //     setDeleteModal(false)
-    // }, [])
+    const hideDeleteModal = useCallback(() => {
+        setDeleteModal(false)
+    }, [])
 
-    // const deleteLent = useCallback(async (id) => {
-    //     const findIndex = lents.findIndex((el) => el.id === id);
+    const deleteLent = useCallback(async (id) => {
+        const findIndex = lents.findIndex((el) => el.id === id);
 
-    //     setRequestState(() => true)
-    //     // Backend
-    //     try {
-    //         await SpendingActionsService.deleteLent(lents[findIndex]);
-    //         setLents((oldValue) => {
-    //             oldValue.splice(findIndex, 1);
-    //             return [
-    //                 ...oldValue
-    //             ]
-    //         })
-    //         toast.success("Successfully deleted lent record")
-    //         hideDeleteModal()
-    //     } catch (error) {
-    //         toast.error("Couldn't delete record")
-    //     } finally {
-    //         setRequestState(() => false)
-    //     }
-    // }, [hideDeleteModal, lents])
+        setRequestState(() => true)
+        // Backend
+        try {
+            await SpendingActionsService.deleteSpendingAction(lents[findIndex].id, 'lent');
+            setLents((oldValue) => {
+                oldValue.splice(findIndex, 1);
+                return [
+                    ...oldValue
+                ]
+            })
+            toast.success("Successfully deleted lent record")
+            hideDeleteModal()
+        } catch (error) {
+            toast.error("Couldn't delete record")
+        } finally {
+            setRequestState(() => false)
+        }
+    }, [hideDeleteModal, lents])
 
     const amountInputHandler = useCallback((event) => {
         setAmount(() => event.target.value)
@@ -167,7 +170,7 @@ const Lents = () => {
                     setRequestState={setRequestState}
                 />
             )}
-            {/* {deleteModal && (
+            {deleteModal && (
                 <Modal closeModal={hideDeleteModal}>
                     <div className="text-left font-bold text-lg ">Delete Lent Record</div>
                     <div className="mt-3">
@@ -180,7 +183,7 @@ const Lents = () => {
                         </div>
                     </div>
                 </Modal>
-            )} */}
+            )}
             <div className="mb-3">
                 <div className="text-left font-bold text-xl mb-1 text-main dark:text-primary w-full">
                     ALL YOUR LENT RECORDS
@@ -223,9 +226,9 @@ const Lents = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {lents.map((lent, index) => (
+                                {tableData.map((lent, index) => (
                                     <tr className="text-center" key={index}>
-                                        <td className="border-b p-2 border-r">{index + 1}</td>
+                                        <td className="border-b p-2 border-r">{tableLastIndex + (index + 1)}</td>
                                         <td className="border-b">
                                             ₦ {lent.amount.toLocaleString()}
                                         </td>
@@ -242,15 +245,16 @@ const Lents = () => {
                                                 onClick={() => showEditLent(lent)}
                                                 className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center inline mx-2"
                                             />
-                                            {/* <FaTrash
+                                            <FaTrash
                                                 onClick={() => confirmDeleteSpending(lent.id)}
                                                 className="text-gray-500 dark:text-gray-400 text-xl cursor-pointer text-center inline mx-2"
-                                            /> */}
+                                            />
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                        {paginationHTML}
                     </div>
                 )}
                 {loading && <p>Loading lent records. please wait</p>}

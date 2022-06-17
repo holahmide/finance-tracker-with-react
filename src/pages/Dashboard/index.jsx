@@ -42,8 +42,8 @@ const Dashboard = () => {
             </div>
             <div
                 onClick={() => toggleSideBar()}
-                className={`${sideBar ? "text-main border-main border-2" : ""
-                    } z-40 md:hidden fixed bottom-0 right-0 m-3 p-3 dark:bg-dark bg-gray-300 rounded-full cursor-pointer shadow-lg text-gray-500 dark:text-gray-400  hover:text-main hover:border-main hover:border-2 transition-all`}
+                className={`${sideBar ? "text-main dark:text-primary border-main dark:border-primary border-2" : ""
+                    } z-40 md:hidden fixed bottom-0 right-0 m-3 p-3 dark:bg-dark bg-gray-300 rounded-full cursor-pointer shadow-lg text-gray-500 dark:text-gray-400  hover:text-main hover:dark:text-primary hover:border-main hover:dark:border-primary hover:border-2 transition-all`}
             >
                 <FaHamburger className="text-xl cursor-pointer" />
             </div>

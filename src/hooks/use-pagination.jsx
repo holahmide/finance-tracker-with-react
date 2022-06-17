@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const usePagination = ({ data:fullData, size, span }) => {
+const usePagination = ({ data: fullData, size, span }) => {
     // const { data, size, span } = dataObject;
     // page data
     const [pageData, setPageData] = useState([]);
@@ -18,6 +18,8 @@ const usePagination = ({ data:fullData, size, span }) => {
     const [firstPage, setFirstPage] = useState(0);
     // Last Page
     const [lastPage, setLastPage] = useState(0);
+    // Last row index
+    const [lastRowIndex, setLastRowIndex] = useState(0);
 
     // Pagination
     useEffect(() => {
@@ -47,6 +49,8 @@ const usePagination = ({ data:fullData, size, span }) => {
                 setActivePage(() => 0);
             }
 
+            console.log(fullData)
+            console.log(fullData[0])
             setPageData(() => fullData.slice(0, rowsPerPage));
         }
         paginate();
@@ -54,40 +58,52 @@ const usePagination = ({ data:fullData, size, span }) => {
 
     const goToPage = useCallback((page) => {
         if (activePage === page) return
-        let index = ((page - 1) * rowsPerPage) + 1 // finding first index of page
+        let index = ((page - 1) * rowsPerPage) // finding first index of page
         setPageData(() => fullData.slice(index, (index + rowsPerPage)));
         setActivePage(() => page);
     }, [activePage, fullData, rowsPerPage])
 
 
     const shiftPageListLeft = useCallback(() => {
-        setListOfPages(() => listOfPages.map(function (value) { return value - 1; }));
-        setFirstPage(() => listOfPages[0]);
-        setLastPage(() => listOfPages[listOfPages.length - 1]);
-    }, [listOfPages])
+        setListOfPages((oldValue) => oldValue.map((value) => { return value - 1; }));
+        // setFirstPage(() => listOfPages[0]);
+        // setLastPage(() => listOfPages[listOfPages.length - 1]);
+        setFirstPage((oldValue) => oldValue - 1);
+        setLastPage((oldValue) => oldValue - 1);
+    }, [])
 
     const shiftPageListRight = useCallback(() => {
-        setListOfPages(() => listOfPages.map(function (value) { return value + 1; }));
-        setFirstPage(() => listOfPages[0]);
-        setLastPage(() => listOfPages[listOfPages.length - 1]);
-    }, [listOfPages])
+        setListOfPages((oldValue) => oldValue.map((value) => { return value + 1; }));
+        // setFirstPage(() => listOfPages[0]);
+        // setLastPage(() => listOfPages[listOfPages.length - 1]);
+        setFirstPage((oldValue) => oldValue + 1);
+        setLastPage((oldValue) => oldValue + 1);
+    }, [])
     const nextPage = useCallback(() => {
         // finding first index of next page
-        let index = (activePage * rowsPerPage) + 1;
+        let index = (activePage * rowsPerPage);
         setPageData(() => fullData.slice(index, (index + rowsPerPage)));
-        setActivePage((oldValue) => oldValue += 1);
-        // Check if active page list is visible in page list
-        let activePageIndex = listOfPages.indexOf(activePage);
-        if (activePageIndex === -1) shiftPageListRight();
+        setActivePage((oldValue) => {
+            // Check if active page list is visible in page list
+            let activePageIndex = listOfPages.indexOf(oldValue + 1);
+            if (activePageIndex === -1) shiftPageListRight();
+            return oldValue += 1
+        });
     }, [activePage, fullData, listOfPages, rowsPerPage, shiftPageListRight])
     const prevPage = useCallback(() => {
-        let index = ((activePage - 2) * rowsPerPage) + 1;
+        let index = ((activePage - 2) * rowsPerPage);
         setPageData(() => fullData.slice(index, (index + rowsPerPage)));
-        setActivePage((oldValue) => oldValue -= 1);
-        // Check if active page list is visible in page list
-        let activePageIndex = listOfPages.indexOf(activePage);
-        if (activePageIndex === -1) shiftPageListLeft();
+        setActivePage((oldValue) => {
+            // Check if active page list is visible in page list
+            let activePageIndex = listOfPages.indexOf(oldValue - 1);
+            if (activePageIndex === -1) shiftPageListLeft();
+            return oldValue -= 1
+        });
     }, [activePage, fullData, listOfPages, rowsPerPage, shiftPageListLeft])
+
+    useEffect(() => {
+        setLastRowIndex(() => (activePage - 1) * rowsPerPage);
+    }, [activePage, rowsPerPage])
 
 
     const paginationHTML = (
@@ -99,18 +115,16 @@ const usePagination = ({ data:fullData, size, span }) => {
             {listOfAllPages.length > 1 && <div className="grid grid-cols-1 md:grid-cols-2 p-2">
                 <div className="text-center md:text-left mt-2 pl-6 pr-6 mb-4">
                     {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span onClick={shiftPageListLeft} className="border p-2 hover:bg-gray-300 cursor-pointer">&#60;&#60;</span>}
-                    {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border p-2 hover:bg-gray-300 cursor-pointer" v-if="">...</span>}
+                    {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border p-2 hover:bg-gray-300 cursor-pointer">...</span>}
                     {listOfPages.map((page, index) =>
-                        // <span key={index} onClick={() => goToPage(page)} className={`border p-2 hover:bg-gray-300 cursor-pointer '+ ${(activePage === page ? 'bg-gray-300' : '')}`}>{{ page }}</span>
                         <span key={index} onClick={() => goToPage(page)} className={`border p-2 hover:bg-gray-300 cursor-pointer '+ ${(activePage === page ? 'bg-gray-300' : '')}`}>{page}</span>
                     )}
-
-                    {lastPage !== listOfAllPages.length && listOfAllPages.length > maxPageNumberToShow && <span className="border p-2 hover:bg-gray-300 cursor-pointer" >...</span>}
-                    {lastPage !== listOfAllPages.length && listOfAllPages.length > maxPageNumberToShow && <span onClick={() => shiftPageListRight} className="border p-2 hover:bg-gray-300 cursor-pointer" >&#62;&#62;</span>}
+                    {(lastPage !== listOfAllPages.length) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border p-2 hover:bg-gray-300 cursor-pointer" >...</span>}
+                    {(lastPage !== listOfAllPages.length) && (listOfAllPages.length > maxPageNumberToShow) && <span onClick={shiftPageListRight} className="border p-2 hover:bg-gray-300 cursor-pointer" >&#62;&#62;</span>}
                 </div>
                 <div className="text-center md:text-right">
-                    {activePage !== 1 && <button onClick={prevPage} className="bg-green-900 text-white pl-4 pr-4 pt-2 pb-2 rounded-lg mr-4" v-if="">Prev</button>}
-                    {activePage !== listOfAllPages.length && <button onClick={nextPage} className="bg-green-900 text-white pl-4 pr-4 pt-2 pb-2 rounded-lg" v-if="">Next</button>}
+                    {(activePage !== 1) && <button onClick={prevPage} className="bg-main dark:bg-primary text-white pl-4 pr-4 pt-2 pb-2 rounded-lg mr-4">Prev</button>}
+                    {(activePage !== listOfAllPages.length) && <button onClick={nextPage} className="bg-main dark:bg-primary text-white pl-4 pr-4 pt-2 pb-2 rounded-lg" v-if="">Next</button>}
                 </div><br />
             </div>}
         </div>
@@ -126,6 +140,7 @@ const usePagination = ({ data:fullData, size, span }) => {
         listOfPages,
         pageData,
         paginationHTML,
+        lastRowIndex,
 
         shiftPageListLeft,
         shiftPageListRight,

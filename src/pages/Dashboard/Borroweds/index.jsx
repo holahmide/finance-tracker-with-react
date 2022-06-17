@@ -34,7 +34,7 @@ const Borroweds = () => {
     const [activeDeleteBorrowed, setActiveDeleteBorrowed] = useState(false);
     const [requestState, setRequestState] = useState(false);
 
-    const { paginationHTML, pageData: borrowedTable } = usePagination({ data: borroweds, size: 5, span: 10 });
+    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: borroweds, size: 1, span: 10 });
 
     // Quick Add
     const [amount, setAmount] = useState('');
@@ -226,9 +226,9 @@ const Borroweds = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {borrowedTable.map((borrowed, index) => (
+                                {tableData.map((borrowed, index) => (
                                     <tr className="text-center" key={index}>
-                                        <td className="border-b p-2 border-r">{index + 1}</td>
+                                        <td className="border-b p-2 border-r">{tableLastIndex + (index + 1)}</td>
                                         <td className="border-b">
                                             ₦ {borrowed.amount.toLocaleString()}
                                         </td>

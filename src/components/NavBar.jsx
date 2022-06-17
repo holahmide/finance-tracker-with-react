@@ -4,7 +4,7 @@ import { FaSignOutAlt } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
 
 const NavBar = () => {
-    const {logoutUser} = useContext(AuthContext);
+    const { logoutUser } = useContext(AuthContext);
     return (
         // <div
         //     className="bg-gray-200 dark:bg-dark dark:shadow-lg w-full"
