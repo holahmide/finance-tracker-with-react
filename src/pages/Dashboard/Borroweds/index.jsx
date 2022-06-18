@@ -34,7 +34,7 @@ const Borroweds = () => {
     const [activeDeleteBorrowed, setActiveDeleteBorrowed] = useState(false);
     const [requestState, setRequestState] = useState(false);
 
-    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: borroweds, size: 1, span: 10 });
+    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: borroweds, size: 10, span: 10 });
 
     // Quick Add
     const [amount, setAmount] = useState('');

@@ -4,6 +4,7 @@ import Moment from "react-moment";
 import SpendingActionsService from "../../../services/spending-actions-service";
 import toast from "react-hot-toast";
 import Loader from "../../../components/UI/loader";
+import usePagination from "../../../hooks/use-pagination";
 
 
 const formatDate = (date) => {
@@ -28,6 +29,8 @@ const Limit = () => {
     const [limit, setLimit] = useState([]);
     const [requestState, setRequestState] = useState(false);
 
+    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: overshoots, size: 10, span: 10 });
+
     // Quick Add
     const [amount, setAmount] = useState('');
     const [fromDate, setFromDate] = useState(currentDate);
@@ -36,7 +39,7 @@ const Limit = () => {
     const initialSetup = useCallback(async () => {
         console.log("here");
         const response = await SpendingActionsService.fetchLimitOvershoots();
-        setOvershoots(response.data.overshoots.records.reverse().splice(0, 10));
+        setOvershoots(response.data.overshoots.records.reverse());
         if (!response.data.limits.length) {
             toast("No limit record found");
         }
@@ -147,9 +150,9 @@ const Limit = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {overshoots.map((overshoot, index) => (
+                                {tableData.map((overshoot, index) => (
                                     <tr className={`text-center ${overshoot.credit ? 'bg-green-800 text-white dark:bg-green-900' : 'bg-red-900 dark:bg-red-900 text-white'}`} key={index}>
-                                        <td className="border-b p-2 border-r">{index + 1}</td>
+                                        <td className="border-b p-2 border-r">{tableLastIndex + (index + 1)}</td>
                                         <td className="border-b">
                                             ₦ {overshoot.amount.toLocaleString()}
                                         </td>
@@ -168,6 +171,7 @@ const Limit = () => {
                                 ))}
                             </tbody>
                         </table>
+                        {paginationHTML}
                     </div>
                 )}
                 {loading && <p>Loading limit overshoots. please wait</p>}

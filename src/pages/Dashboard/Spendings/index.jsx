@@ -8,6 +8,7 @@ import EditSpending from "../../../components/Spending/EditSpending";
 import Modal from "../../../components/UI/modal";
 import toast from "react-hot-toast";
 import Loader from "../../../components/UI/loader";
+import usePagination from "../../../hooks/use-pagination";
 
 // const data = [
 //     { name: "Jan 2021", uv: 400, pv: 2400, amt: 2400 },
@@ -33,6 +34,8 @@ const Spendings = () => {
     const [activeDeleteSpending, setActiveDeleteSpending] = useState(false);
     const [requestState, setRequestState] = useState(false);
 
+    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: spendings, size: 10, span: 10 });
+
     // Quick Add
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
@@ -41,7 +44,7 @@ const Spendings = () => {
     useEffect(() => {
         const initialSetup = async () => {
             const response = await SpendingService.fetchAll();
-            setSpendings(response.data.spendings.reverse().splice(0, 10));
+            setSpendings(response.data.spendings.reverse());
             setLoading(() => false);
         };
         initialSetup();
@@ -248,9 +251,9 @@ const Spendings = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {spendings.map((spending, index) => (
+                                {tableData.map((spending, index) => (
                                     <tr className="text-center" key={index}>
-                                        <td className="border-b p-2 border-r">{index + 1}</td>
+                                        <td className="border-b p-2 border-r">{tableLastIndex + (index + 1)}</td>
                                         <td className="border-b">
                                             ₦ {spending.amount.toLocaleString()}
                                         </td>
@@ -276,6 +279,7 @@ const Spendings = () => {
                                 ))}
                             </tbody>
                         </table>
+                        {paginationHTML}
                     </div>
                 )}
                 {loading && <p>Loading Spending records. please wait</p>}

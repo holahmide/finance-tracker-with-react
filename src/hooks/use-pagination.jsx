@@ -107,24 +107,24 @@ const usePagination = ({ data: fullData, size, span }) => {
 
 
     const paginationHTML = (
-        <div>
+        <div class="w-full">
             <br />
             <div className="text-center">
                 <span>Showing {activePage} of {listOfAllPages.length}</span>
             </div>
-            {listOfAllPages.length > 1 && <div className="grid grid-cols-1 md:grid-cols-2 p-2">
-                <div className="text-center md:text-left mt-2 pl-6 pr-6 mb-4">
-                    {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span onClick={shiftPageListLeft} className="border p-2 hover:bg-gray-300 cursor-pointer">&#60;&#60;</span>}
-                    {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border p-2 hover:bg-gray-300 cursor-pointer">...</span>}
+            {listOfAllPages.length > 1 && <div className="w-full p-2">
+                <div className="text-center mt-2 pl-1 pr-1 mb-4">
+                    {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span onClick={shiftPageListLeft} className="border inline border-dark dark:border-white p-2 hover:bg-gray-300 cursor-pointer">&#60;&#60;</span>}
+                    {(firstPage !== 1) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border border-dark dark:border-white p-2 hover:bg-gray-300 cursor-pointer">...</span>}
                     {listOfPages.map((page, index) =>
-                        <span key={index} onClick={() => goToPage(page)} className={`border p-2 hover:bg-gray-300 cursor-pointer '+ ${(activePage === page ? 'bg-gray-300' : '')}`}>{page}</span>
+                        <span key={index} onClick={() => goToPage(page)} className={`transition-all border border-dark dark:border-white p-2 hover:bg-dark hover:text-white hover:dark:bg-gray-300 hover:dark:text-dark cursor-pointer '+ ${(activePage === page ? 'dark:bg-gray-300 dark:text-dark bg-dark text-white' : 'bg-transparent')}`}>{page}</span>
                     )}
-                    {(lastPage !== listOfAllPages.length) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border p-2 hover:bg-gray-300 cursor-pointer" >...</span>}
-                    {(lastPage !== listOfAllPages.length) && (listOfAllPages.length > maxPageNumberToShow) && <span onClick={shiftPageListRight} className="border p-2 hover:bg-gray-300 cursor-pointer" >&#62;&#62;</span>}
+                    {(lastPage !== listOfAllPages.length) && (listOfAllPages.length > maxPageNumberToShow) && <span className="border border-dark dark:border-white p-2 hover:bg-gray-300 cursor-pointer" >...</span>}
+                    {(lastPage !== listOfAllPages.length) && (listOfAllPages.length > maxPageNumberToShow) && <span onClick={shiftPageListRight} className="border border-dark dark:border-white p-2 hover:bg-gray-300 cursor-pointer" >&#62;&#62;</span>}
                 </div>
-                <div className="text-center md:text-right">
+                <div className="text-center">
                     {(activePage !== 1) && <button onClick={prevPage} className="bg-main dark:bg-primary text-white pl-4 pr-4 pt-2 pb-2 rounded-lg mr-4">Prev</button>}
-                    {(activePage !== listOfAllPages.length) && <button onClick={nextPage} className="bg-main dark:bg-primary text-white pl-4 pr-4 pt-2 pb-2 rounded-lg" v-if="">Next</button>}
+                    {(activePage !== listOfAllPages.length) && <button onClick={nextPage} className="bg-main dark:bg-primary text-white pl-4 pr-4 pt-2 pb-2 rounded-lg">Next</button>}
                 </div><br />
             </div>}
         </div>

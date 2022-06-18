@@ -39,7 +39,7 @@ const Lents = () => {
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(currentDate);
 
-    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: lents, size: 5, span: 10 });
+    const { paginationHTML, pageData: tableData, lastRowIndex: tableLastIndex } = usePagination({ data: lents, size: 10, span: 10 });
 
     useEffect(() => {
         const initialSetup = async () => {
