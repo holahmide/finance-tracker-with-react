@@ -37,15 +37,19 @@ const Limit = () => {
     const [toDate, setToDate] = useState(currentDate);
 
     const initialSetup = useCallback(async () => {
-        console.log("here");
-        const response = await SpendingActionsService.fetchLimitOvershoots();
-        setOvershoots(response.data.overshoots.records.reverse());
-        if (!response.data.limits.length) {
-            toast("No limit record found");
+        try {
+            const response = await SpendingActionsService.fetchLimitOvershoots();
+            setOvershoots(response.data.overshoots.records.reverse());
+            if (!response.data.limits.length) {
+                toast("No limit record found");
+            }
+            // First and only limit (Backend configured to have multiple limits)
+            setLimit(response.data.limits.reverse()[0]);
+        } catch (error) {
+            toast(error?.response?.data?.message || 'Couldn\'t fetch limits & overshoots. Reload the page.')
+        } finally {
+            setLoading(() => false);
         }
-        // First and only limit (Backend configured to have multiple limits)
-        setLimit(response.data.limits.reverse()[0]);
-        setLoading(() => false);
     }, []);
 
     useEffect(() => {

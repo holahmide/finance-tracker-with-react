@@ -23,9 +23,9 @@ const Login = () => {
             const response = await AuthService.login({ email: email.current.value, password: password.current.value });
             toast.success(response.data.message);
             loginUser(response.data);
-            navigate('/dashboard');
+            navigate('/dashboard/spendings');
         } catch (error) {
-            toast.error(error.response.data.message);
+            toast.error(error?.response?.data?.message || 'An error occurred. Try again.');
         } finally {
             setLoading(() => false);
         }

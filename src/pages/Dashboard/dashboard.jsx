@@ -1,6 +1,6 @@
 const DashboardIndex = () => {
     return (
-        <div>Index</div>
+        <div>Dashboard Index (Coming soon...)</div>
     );
 }
 

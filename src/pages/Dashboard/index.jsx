@@ -9,6 +9,7 @@ import Lents from "./Lents";
 import Borroweds from "./Borroweds";
 import Limit from "./Limit";
 import Profile from "./Profile";
+import NotFoundPage from "../404";
 
 const Dashboard = () => {
     const location = useLocation();
@@ -30,6 +31,7 @@ const Dashboard = () => {
                     <NavBar />
                     <div className="p-6 mt-11">
                         <Routes>
+                            <Route path='*' element={<NotFoundPage />} />
                             <Route path="/" exact element={<DashboardIndex />} />
                             <Route path="/spendings" exact element={<Spendings />} />
                             <Route path="/lents" exact element={<Lents />} />

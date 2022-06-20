@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
 const usePagination = ({ data: fullData, size, span }) => {
-    // const { data, size, span } = dataObject;
     // page data
     const [pageData, setPageData] = useState([]);
     // no_of_data per page
@@ -107,7 +106,7 @@ const usePagination = ({ data: fullData, size, span }) => {
 
 
     const paginationHTML = (
-        <div class="w-full">
+        <div className="w-full">
             <br />
             <div className="text-center">
                 <span>Showing {activePage} of {listOfAllPages.length}</span>

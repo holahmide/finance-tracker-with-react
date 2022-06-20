@@ -21,8 +21,7 @@ export const AuthProvider = ({ children }) => {
                 const response = await AuthService.getUser();
                 loginUser(response.data);
             } catch (error) {
-                console.log(error)
-                logoutUser();
+                toast.error(error?.response?.data?.message || 'An error occurred. Try again.');
             } finally {
                 setLoading(false);
             }

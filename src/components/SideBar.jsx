@@ -37,9 +37,9 @@ const SideBar = ({ sideBar }) => {
                 </div>
                 <div className="mt-4">{`${context.user.firstname} ${context.user.lastname}`}</div>
                 <div className="mt-3 w-full text-left">
-                    <Link to="/dashboard">
+                    {/* <Link to="/dashboard">
                         <div className={linkStyle("")}>Dashboard</div>
-                    </Link>
+                    </Link> */}
 
                     <Link to="/dashboard/spendings">
                         <div className={linkStyle("spendings")}>Spendings</div>
