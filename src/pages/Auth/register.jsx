@@ -4,11 +4,9 @@ import loginSVG from '../../images/login.svg';
 import loginDarkSVG from '../../images/login_dark.svg';
 import AuthService from '../../services/auth-service';
 import toast from 'react-hot-toast';
-import { AuthContext } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext';
 
 const Regsiter = () => {
-    const { loginUser } = useContext(AuthContext)
     const { theme } = useContext(ThemeContext)
     const navigate = useNavigate();
     const email = useRef('olami02bj@gmail.com');
