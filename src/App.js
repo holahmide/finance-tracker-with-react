@@ -1,7 +1,6 @@
 import "./App.css";
 import Login from "./pages/Auth/login";
 import Register from "./pages/Auth/register";
-// import Toggle from "./components/UI/ThemeToggle";
 import Dashboard from "./pages/Dashboard";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
@@ -10,7 +9,6 @@ import GuestRoute from "./components/GuestRoute";
 import NotFoundPage from "./pages/404";
 
 function App() {
-  // const context = useContext(AuthContext);
 
   return (
     <div className="App dark:text-white  transition-all">

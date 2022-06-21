@@ -149,9 +149,6 @@ const useSpending = (user) => {
     const inputChangeHandler = useCallback(
         (value, pageId, type, field, id = null) => {
             setSpending((oldValue) => {
-                // let findObject = oldValue[type].find((el) => el.pageId === pageId);
-                // findObject[field] = value;
-                // return {...oldValue}
                 let findIndex = -1;
                 if (id) { // For old records of spending, that wont have a pageId
                     findIndex = oldValue[type].findIndex((el) => Number(el.id) === id);
@@ -347,93 +344,36 @@ const useSpending = (user) => {
                     oldValue[type].splice(findIndex, 1);
                     return { ...oldValue };
                 });
-                // if (type === 'Breakdowns') {
-                //     findIndex = breakdowns.findIndex(el => el.id === id)
-                //     setRemovedFields((oldValue) => {
-                //         oldValue[type].push(breakdowns[findIndex].id)
-                //         return oldValue
-                //     })
-                //     // Delelte field from the spending object
-                //     setBreakdowns((oldValue) => {
-                //         oldValue.splice(findIndex, 1)
-                //         return [...oldValue]
-                //     })
-                // }
-                // else if (type === 'Borroweds') {
-                //     findIndex = borroweds.findIndex(el => el.id === id)
-                //     setRemovedFields((oldValue) => {
-                //         oldValue[type].push(borroweds[findIndex].id)
-                //         return oldValue
-                //     })
-                //     // Delelte field from the spending object
-                //     setBorroweds((oldValue) => {
-                //         oldValue.splice(findIndex, 1)
-                //         return [...oldValue]
-                //     })
-                // }
-                // else if (type === 'Lents') {
-                //     findIndex = lents.findIndex(el => el.id === id)
-                //     setRemovedFields((oldValue) => {
-                //         oldValue[type].push(lents[findIndex].id)
-                //         return oldValue
-                //     })
-                //     // Delelte field from the spending object
-                //     setLents((oldValue) => {
-                //         oldValue.splice(findIndex, 1)
-                //         return [...oldValue]
-                //     })
-                // }
             } else {
                 findIndex = spending[type].findIndex((el) => el.pageId === pageId);
                 setSpending((oldValue) => {
                     oldValue[type].splice(findIndex, 1);
                     return { ...oldValue };
                 });
-                // if (type === 'Breakdowns') {
-                //     findIndex = breakdowns.findIndex(el => el.pageId === pageId)
-                //     setBreakdowns((oldValue) => {
-                //         oldValue.splice(findIndex, 1)
-                //         return [...oldValue]
-                //     })
-                // }
-                // else if (type === 'Borroweds') {
-                //     findIndex = borroweds.findIndex(el => el.pageId === pageId)
-                //     setBorroweds((oldValue) => {
-                //         oldValue.splice(findIndex, 1)
-                //         return [...oldValue]
-                //     })
-                // }
-                // else if (type === 'Lents') {
-                //     findIndex = lents.findIndex(el => el.pageId === pageId)
-                //     setLents((oldValue) => {
-                //         oldValue.splice(findIndex, 1)
-                //         return [...oldValue]
-                //     })
-                // }
             }
         },
         [spending]
     );
 
     return {
+        id,
         breakdownCounter,
         borrowedCounter,
         lentCounter,
         date,
         amount,
         spending,
+        removedFields,
+
         initialCreateSetup,
         inputChangeHandler,
         dateChangeHandler,
         addFields,
         reset,
         validateForm,
-
-        id,
         initialEditSetup,
         validateSpendingAction,
         deleteField,
-        removedFields,
     };
 };
 

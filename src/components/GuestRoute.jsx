@@ -6,7 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 function GuestRoute({children}) {
     const { isAuthenticated } = useContext(AuthContext);
 
-    return !isAuthenticated ? children : <Navigate to="/dashboard" />;
+    return !isAuthenticated ? children : <Navigate to="/dashboard/spendings" />;
 }
 
 export default GuestRoute;

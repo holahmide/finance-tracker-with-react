@@ -6,6 +6,7 @@ import AuthService from '../../services/auth-service';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../../context/AuthContext';
 import { ThemeContext } from '../../context/ThemeContext';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
     const { loginUser } = useContext(AuthContext)
@@ -43,7 +44,7 @@ const Login = () => {
                     <form onSubmit={submitFormHandler}>
                         <div className='text-left mb-3'>
                             <label className="text-left dark:text-white" htmlFor='email'>Email</label> <br />
-                            <input ref={email} required type="text" name="email" className="bg-gray-200 dark:bg-gray-900 p-2 outline-none focus:border-l-main dark:focus:border-l-primary shadow-lg border-2 border-transparent border-b-main dark:border-b-primary rounded-sm" />
+                            <input ref={email} required type="text" name="email" className="bg-gray-200 dark:bg-gray-900 dark:focus:bg-gray-900 p-2 outline-none focus:border-l-main dark:focus:border-l-primary shadow-lg border-2 border-transparent border-b-main dark:border-b-primary rounded-sm" />
                         </div>
                         <div className='text-left mb-3'>
                             <label className="text-left dark:text-white" htmlFor='password'>Password</label> <br />
@@ -51,6 +52,9 @@ const Login = () => {
                         </div>
                         <div>
                             <button disabled={loading} type="submit" className='bg-main dark:bg-primary w-full px-4 py-2 text-white hover:opacity-90 transition-all'>{loading ? 'Loading' : 'LOGIN'}</button>
+                        </div>
+                        <div className='mt-2'>
+                            Don't have an account? <Link to="/register" className='text-secondary dark:text-primary'>Create One</Link>
                         </div>
                     </form>
                 </div>

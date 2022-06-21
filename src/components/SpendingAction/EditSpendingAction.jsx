@@ -30,10 +30,7 @@ const EditSpendingAction = ({ type, spendingAction: lentData, close, updateSpend
         if (user) {
             initialEditSetup({ [`${capitalizeFirstLetter(type)}s`]: [spendingAction] });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
-
-    // console.log(lentObject)
+    }, [initialEditSetup, spendingAction, type, user]);
 
 
     const editSpendingAction = async () => {

@@ -48,8 +48,6 @@ const usePagination = ({ data: fullData, size, span }) => {
                 setActivePage(() => 0);
             }
 
-            console.log(fullData)
-            console.log(fullData[0])
             setPageData(() => fullData.slice(0, rowsPerPage));
         }
         paginate();

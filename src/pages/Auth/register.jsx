@@ -5,15 +5,16 @@ import loginDarkSVG from '../../images/login_dark.svg';
 import AuthService from '../../services/auth-service';
 import toast from 'react-hot-toast';
 import { ThemeContext } from '../../context/ThemeContext';
+import { Link } from 'react-router-dom';
 
 const Regsiter = () => {
     const { theme } = useContext(ThemeContext)
     const navigate = useNavigate();
-    const email = useRef('olami02bj@gmail.com');
-    const firstName = useRef('k');
-    const lastName = useRef('k');
-    const confirmPassword = useRef('k');
-    const password = useRef('k');
+    const email = useRef('');
+    const firstName = useRef('');
+    const lastName = useRef('');
+    const confirmPassword = useRef('');
+    const password = useRef('');
     const [loading, setLoading] = useState(false);
 
     const submitFormHandler = async (event) => {
@@ -71,6 +72,9 @@ const Regsiter = () => {
                         </div>
                         <div>
                             <button disabled={loading} type="submit" className='bg-main dark:bg-primary w-full px-4 py-2 text-white hover:opacity-90 transition-all'>{loading ? 'Loading' : 'Register'}</button>
+                        </div>
+                        <div className='mt-2'>
+                            Already have an account? <Link to="/login" className='text-secondary dark:text-primary'>Login</Link>
                         </div>
                     </form>
                 </div>

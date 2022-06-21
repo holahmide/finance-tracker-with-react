@@ -21,7 +21,9 @@ export const AuthProvider = ({ children }) => {
                 const response = await AuthService.getUser();
                 loginUser(response.data);
             } catch (error) {
-                toast.error(error?.response?.data?.message || 'An error occurred. Try again.');
+                if (error?.response?.status !== 401) {
+                    toast.error(error?.response?.data?.message || 'Server Error. Please confirm that the NodeJS server is running.');
+                }
             } finally {
                 setLoading(false);
             }
