@@ -1,6 +1,7 @@
-import useInput from "../../hooks/use-input";
+import React from 'react';
+import useInput from '../../hooks/use-input';
 
-const Input = ({ stateValue }) => {
+const Input = () => {
   const {
     value: enteredName,
     isValid: enteredNameIsValid,
@@ -8,7 +9,7 @@ const Input = ({ stateValue }) => {
     valueChangeHandler: nameChangeHandler,
     inputBlurHandler: nameBlurHandler,
     reset: resetNameInput
-  } = useInput((value) => value.trim() !== "");
+  } = useInput((value) => value.trim() !== '');
 
   let formIsValid = false;
 
@@ -23,7 +24,7 @@ const Input = ({ stateValue }) => {
       return;
     }
 
-    resetNameInput()
+    resetNameInput();
   };
 
   const nameInputClasses = enteredNameIsValid ? 'invalid' : '';
@@ -39,7 +40,7 @@ const Input = ({ stateValue }) => {
           onBlur={nameBlurHandler}
           value={enteredName}
         />
-        {nameInputHasError&& <p>Name must not be empty</p>}
+        {nameInputHasError && <p>Name must not be empty</p>}
       </div>
     </form>
   );

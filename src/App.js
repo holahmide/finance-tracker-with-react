@@ -1,15 +1,15 @@
-import "./App.css";
-import Login from "./pages/Auth/login";
-import Register from "./pages/Auth/register";
-import Dashboard from "./pages/Dashboard";
-import { Route, Routes, Navigate } from "react-router-dom";
-import { AuthContext, AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-import GuestRoute from "./components/GuestRoute";
-import NotFoundPage from "./pages/404";
+import React from 'react';
+import './App.css';
+import Login from './pages/Auth/login';
+import Register from './pages/Auth/register';
+import Dashboard from './pages/Dashboard';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { AuthContext, AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import GuestRoute from './components/GuestRoute';
+import NotFoundPage from './pages/404';
 
-function App() {
-
+function App () {
   return (
     <div className="App dark:text-white  transition-all">
       <AuthProvider>
@@ -22,12 +22,8 @@ function App() {
                 </div> */}
                 {!loading && (
                   <Routes>
-                     <Route path='*' element={<NotFoundPage />} />
-                    <Route
-                      path="/"
-                      exact
-                      element={<Navigate replace to="/login" />}
-                    />
+                    <Route path="*" element={<NotFoundPage />} />
+                    <Route path="/" exact element={<Navigate replace to="/login" />} />
                     <Route
                       path="/login"
                       element={
