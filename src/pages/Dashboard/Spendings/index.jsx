@@ -22,10 +22,14 @@ const Spendings = () => {
   // const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
   const [spendings, setSpendings] = useState([]);
+
+  // Modal States
   const [editModal, setEditModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [activeEditSpending, setActiveEditSpending] = useState(false);
   const [activeDeleteSpending, setActiveDeleteSpending] = useState(false);
+
+  // Request state
   const [requestState, setRequestState] = useState(false);
 
   const {
